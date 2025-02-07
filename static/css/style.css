@@ -1,0 +1,83 @@
+/*
+_______________________________________
+
+	- Name : AGP Bootstrap
+	- Date : January 2025
+	- Description: Style CSS
+	- Version: 1.0
+	- Original author: Team SIO-LdV
+_______________________________________
+*/
+
+
+/*
+Polices GoogleFonts :
+---------------------
+
+
+/*
+______________________________________________
+
+	DEFINITIONS DES CONSTANTES DE STYLES 
+______________________________________________
+*/
+
+
+/*
+______________________________________________
+
+	ELEMENTS GENEREAUX 
+______________________________________________
+*/
+
+/*
+________________________________________________
+
+	DEFINITION DES PROPRIETES DES CLASSES CSS
+________________________________________________
+*/
+
+
+/*
+Personnalisation des liens :
+----------------------------
+*/
+
+/* Style par défaut : sans soulignement et avec couleur héritée */
+.custom-link {
+    text-decoration: none; /* Supprime le soulignement */
+    color: inherit; /* Hérite de la couleur du parent (text-warning) */
+    transition: color 0.3s ease, text-decoration 0.3s ease; /* Ajoute une transition fluide */
+}
+
+/* Au survol : lien souligné */
+.custom-link:hover {
+    text-decoration: underline; /* Ajoute un soulignement */
+}
+
+/* Au clic (état actif) : texte blanc */
+.custom-link:active {
+    color: white; /* Change la couleur au clic */
+}
+
+
+/*
+Définition du fond :
+--------------------
+*/
+
+html, body {
+    height: 100%; /* Assure que le body couvre toute la hauteur de la fenêtre */
+    margin: 0; /* Supprime les marges par défaut */
+}
+
+body {
+    background-image: linear-gradient(0deg, rgba(200, 200, 200, 0.97), rgba(255, 255, 255, 0.97)), url('../images/backgrounds/Vitruvian_Man_by_Leonardo_da_Vinci_resize.jpg');
+    background-position: center;
+    background-repeat: repeat;
+    background-size: contain; /*cover*/ 
+    background-attachment: fixed;
+  }
+
+
+

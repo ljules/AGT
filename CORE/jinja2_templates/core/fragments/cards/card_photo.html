@@ -1,0 +1,146 @@
+<!--
+_______________________________________________________________________________
+
+                                FRAGMENT : card_photo
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient le card permettant de présenter les photos des utilisateurs.
+-->
+
+
+<!-- ------------------------------------------------------------------ -->
+<!-- Définition du style pour le canvas d'affichage de l'image rognée : -->
+<!-- ------------------------------------------------------------------ -->
+<style>
+  .canvas-container {
+      width: 100%;              /* Utilise toute la largeur disponible */
+      display: flex;
+      justify-content: center;  /* Centre horizontalement */
+      align-items: center;      /* Centre verticalement si nécessaire */
+      background-color:rgb(60,60,60);
+  }
+
+  .cropped-canvas {
+      max-height: 230px;    /* Hauteur max pour éviter les images trop grandes */
+      max-width: 100%;          /* Ajustement automatique pour conserver le ratio */
+  }
+</style>
+
+
+<!-- ---------------------- -->
+<!-- Code HTML de la card : -->
+<!-- ---------------------- -->
+
+<div class="card mb-3 m-1 border-2 border-dark shadow" style="height: 480px; min-width: 220px;">
+
+    <!-- Photo affichée avec rognage, centrée et sans déformation -->
+    <div class="canvas-container">
+        <a href="" data-bs-toggle="modal"
+           data-bs-target="#modal-crop-{{ photo.id }}"
+           title="Ouvrir la photo pour la rogner">
+        <canvas id="canvas-{{ photo.id }}" class="cropped-canvas p-2"></canvas>
+        </a>
+    </div>
+
+    <a href="" data-bs-toggle="modal"
+       data-bs-target="#modal-crop-{{ photo.id }}"
+       title="Ouvrir la photo pour la rogner">
+    <img src="{{ photo.image.url }}"
+         class="card-img-top border border-0 border-warning p-0"
+         alt="{{ photo.file_name }}"
+         id="idImgPrev-{{ photo.id }}"
+         style="background-color:rgb(60,60,60)">
+    </a>
+
+
+    <!-- Corps de la card : -->
+    <div class="card-body border-top border-dark bg-light pt-3 ps-2 pe-1">
+        <div class="card-title">
+            <h5><span class="fw-bold text-secondary" style="font-size: 0.9em; color: darkorange;">Nom :</span>
+                {% if photo.fk_id_student != None  %}{{ photo.fk_id_student.last_name }}{% else %}...{% endif %}</h5>
+            <h5><span class="fw-bold text-secondary" style="font-size: 0.9em; color: darkorange;">Prénom :</span>
+                {% if photo.fk_id_student != None %}{{ photo.fk_id_student.first_name }}{% else %}...{% endif %}</h5>
+        </div>
+        <ul style="font-size: 0.8em">
+            <li title="Nom du fichier"><b><i class="bi bi-image text-secondary" style="font-size: 1.6em;"></i> :</b>
+                <i class="text-dark">{{ photo.file_name }}</i></li>
+{#            <li><b>Id img : </b> {{ photo.id }}</li>#}
+            <li title="Numéro Id du QR Code"><b><i class="bi bi-qr-code text-secondary" style="font-size: 1.6em;"></i> :</b>
+                <i class="text-dark">{% if photo.fk_id_student != None %}{{ photo.fk_id_student.id }}{% else %}...{% endif %}</i></li>
+        </ul>
+    </div>
+
+    <!-- Pied de la card : -->
+    <div class="card-footer border-top border-dark text-center" style="background-color:rgb(60,60,60)">
+        <!-- Bouton d'ouverture du modal pour associer un élève : -->
+        <button type="button"
+                class="btn btn-warning"
+                title="Voir l'image complète et affecter un élève"
+                data-bs-toggle="modal"
+                data-bs-target="#modal-select-{{ photo.id }}">
+                    <i class="bi bi-person-lines-fill"></i>
+        </button>
+
+
+        <!-- Bouton d'ouverture du modal pour rogner l'image : -->
+        <button type="button"
+                class="btn btn-warning"
+                title="Ouvrir l'image pour modifier le rognage"
+                data-bs-toggle="modal"
+                data-bs-target="#modal-crop-{{ photo.id }}">
+                    <i class="bi bi-person-bounding-box"></i>
+        </button>
+    </div>
+</div>
+
+
+<!-- --------- -->
+<!-- SCRIPTS : -->
+<!-- --------- -->
+
+<script>
+  // AFFICHAGE DE L'IMAGE RECADREE (ROGNEE) :
+  document.addEventListener("DOMContentLoaded", function () {
+    // Création dynamique des variables pour éviter les erreurs d'injection Jinja
+    const photoId = "{{ photo.id }}";
+
+    // Paramètres de rognage
+    const cropX = {{ photo.crop_x }};               // Position X du début du rognage
+    const cropY = {{ photo.crop_y }};               // Position Y du début du rognage
+    const cropWidth = {{ photo.crop_width }};       // Largeur de la zone à conserver
+    const cropHeight = {{ photo.crop_height }};    // Hauteur de la zone à conserver
+
+    // Récupération du canvas et du contexte
+    const canvas = document.getElementById("canvas-" + photoId);
+    const ctx = canvas.getContext("2d");
+
+    // Définir la taille du canvas selon la zone rognée
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+
+    // Création d'une image JavaScript pour éviter le problème de chargement
+    const img = new Image();
+    img.src = "{{ photo.image.url }}";  // Récupération de l'image Django
+    img.crossOrigin = "Anonymous";  // Assure que l'image peut être manipulée
+
+    // Attendre que l'image soit totalement chargée
+    img.onload = function () {
+      ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+      const imgElement = document.getElementById("idImgPrev-" + photoId);
+      imgElement.parentNode.removeChild(imgElement); // Supprime l'image du DOM
+    };
+
+  });
+</script>
+
+<!-- Modal pour le rognage de l'image : -->
+{% include 'core/fragments/modals/modal_photo_crop.html' %}
+
+<!-- Modal pour la sélection d'un élève : -->
+{% include 'core/fragments/modals/modal_selection_eleve.html' %}
+
+
+
+

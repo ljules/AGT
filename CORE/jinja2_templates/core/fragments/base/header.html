@@ -1,0 +1,54 @@
+<!--
+_______________________________________________________________________________
+
+                                FRAGMENT : header
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient l'entête de l'application.
+-->
+
+
+
+<div class="container-fluid p-0"> <!-- shadow -->
+    <div class="row p-0 align-items-center bg-secondary shadow">
+
+        <!-- Logo Application : -->
+        <div class="col-1 mt-1 mb-1 ms-1 me-2 ps-0" style="height: 30px; width: 40px;">
+            <img src="{{ static('images/logos/ldv.png') }}" class="img-thumbnail ms-3 p-1" style="max-height: 90%;">
+        </div>
+
+        <!-- Nom application : -->
+        <div class="navbar-brand col-1 p-0 justify-content-start text-warning"
+             style="font-size: 1.4em">
+            <b><a class="custom-link" href="{{ SITE_URL }}">AGT</a></b>
+        </div>
+
+        <!-- Identification & déconnexion : --->
+        <div class="d-flex bg-dark col-4 ms-auto pt-1 pb-1 align-items-center">
+            <!-- Identité de l'utilisateur : -->
+            <div class="ms-4 text-light">
+                 John DOE
+            </div>
+
+            <!-- Bouton déconnexion : -->
+            <button type="button"
+                    class="btn d-flex justify-content-center align-items-center btn-warning col-1 mt-0 mb-0 ms-auto me-4 rounded-2"
+                    style="width: 30px; height: 30px; font-size: 1.1em;"
+                    title="Se déconnecter">
+                    <i class="bi bi-key"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Sous titre : -->
+    <div class="row p-0 bg-black shadow">
+        <div class="col m-0 p-0 ps-4 text-white d-none d-sm-block" style="font-size: 0.8em;">
+            <i><b class="text-warning">A</b>pplication de <b class="text-warning">G</b>énération des <b class="text-warning">T</b>rombinoscopes</i>
+        </div>
+    </div>
+
+</div>
+

@@ -1,0 +1,30 @@
+<!--
+_______________________________________________________________________________
+
+                       PAGE D'EDITION DES ELEVES
+_______________________________________________________________________________
+
+Description :
+-------------
+Cette page du template définira la page d'édition des élèves.
+-->
+
+{% extends 'core/base.html' %}
+
+{% block title %} {{ SITE_NAME }}: Inscription {% endblock %}
+
+<!-- Insertion des boutons : -->
+{% block nav_buttons %}
+    {% include 'ad_a2p/fragments/ad_a2p_nav_buttons.html' %}
+{% endblock %}
+
+
+{% block content %}
+
+    <!-- Marge supérieure -->
+    <div class="container" style="height: 90px"></div>
+
+    <!-- Tableau d'édition des élèves inscrit en BD : -->
+    {% include 'core/fragments/forms/form_students_tab_edition.html' %}
+
+{% endblock %}

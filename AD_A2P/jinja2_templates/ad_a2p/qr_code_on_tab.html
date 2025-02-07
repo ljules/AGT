@@ -1,0 +1,47 @@
+<!--
+_______________________________________________________________________________
+
+                       PAGE D'AFFICHAGE QR CODE SUR TABLETTE
+_______________________________________________________________________________
+
+Description :
+-------------
+Cette page du template définira la page d'affichage des QR Codes sur tablette.
+-->
+
+{% extends 'ad_a2p/base_qr_code.html' %}
+
+{% block content %}
+
+    {% block close_button %}
+    <!-- Bouton de fermeture -->
+    <a      href="{{ url('ad_a2p:students_sign_up') }}"
+            type="button"
+            class="btn d-flex justify-content-center rounded-2 p-0"
+            style="position: fixed; z-index: 1050; top: 5px; right: 5px; font-size: 1.2em; color: white; background-color: rgb(135, 3, 3); z-index: 1000;"
+            title="Fermer">
+        <i class="me-2 ms-2 bi bi-x"></i>
+    </a>
+    {% endblock %}
+
+    {%  block flip_button %}
+        <!-- Boutton de bascule affichage mode tablette/eni -->
+        <div class="fixed-top d-flex align-items-center justify-content-center">
+            <a href="{{ url('ad_a2p:qr_code_ins') }}"
+               type="button"
+               class="fixed-top btn btn-secondary d-flex justify-content-center rounded-2 p-2 mt-2"
+               style="size: 2em; z-index: 1020; width: 50px; position: absolute; left: 50%; transform: translateX(-50%);"
+               title="Basculer l'affichage en mode tablette/ENI">
+                <i class="me-2 ms-2 bi bi-person-workspace"></i>
+            </a>
+        </div>
+    {% endblock %}
+
+    {% block zone_qr_code %}
+    <div class="container-fluid vh-100" style="background-color:#64ff64;">
+        {% include 'ad_a2p/fragments/form_qr_code.html' %}
+    </div>
+
+    {% endblock %}
+
+{% endblock %}

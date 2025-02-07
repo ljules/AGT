@@ -1,0 +1,37 @@
+<!--
+_______________________________________________________________________________
+
+               PAGE DE PRESENTATION DU RESULTAT D'UN IMPORT CSV
+_______________________________________________________________________________
+
+Description :
+-------------
+Cette page du template définira la page de présentation à l'issue d'une opération
+d'importation CSV.
+-->
+
+{% extends 'core/base.html' %}
+
+{% block title %}{{ SITE_NAME }}: Résultat importation{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Résultats de l'importation</h2>
+
+    {% if messages %}
+        <div class="mt-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Aucun message à afficher.</p>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{{ url ('ad_a2p:students_sign_up') }}" class="btn btn-primary">Retour à la gestion des élèves</a>
+    </div>
+</div>
+{% endblock %}

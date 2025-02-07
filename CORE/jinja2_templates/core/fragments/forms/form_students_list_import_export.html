@@ -1,0 +1,59 @@
+<!--
+_______________________________________________________________________________
+
+                    FRAGMENT : form-students-list-import-export
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient le tableau d'édition des élèves inscrits dans la BD.
+-->
+
+{% extends 'core/fragments/wrappers/wrapper_standard.html' %}
+
+{% block name_icon %}bi-save2-fill{% endblock %}
+{% block title %}Import/export des listes élèves{% endblock %}
+
+
+<!-- Insertion du formulaire : -->
+{% block wrapper_content %}
+    <div class="container mt-3 mb-4">
+        <h4 class="mb-4"><span class="bi bi-download"></span> Importation des élèves à partir d'un CSV</h4>
+
+        <form method="POST"
+              action="{{  url('ad_a2p:import_students') }}"
+              enctype="multipart/form-data">
+
+           <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+            <div class="row col-8 mb-3 ms-4">
+                <label for="csv_file" class="form-label">
+                <span class="fw-bold">Choisir un fichier CSV </span>
+                    (Fichier contenant 2 colonnes : <i>first_name</i> et <i>last_name</i>) :
+                </label>
+                <!-- Champ de sélection du fichier CSV : -->
+                <input type="file" name="csv_file"
+                       id="csv_file"
+                       class="form-control"
+                       accept=".csv"
+                       required>
+
+            </div>
+            <div class="row col-8 m-auto">
+                <button type="submit" class="btn btn-success w-50 fw-bold"><i class="bi bi-download"></i> Importer</button>
+            </div>
+
+        </form>
+
+        <!-- Affichage des messages -->
+        {# {% if messages %}
+            <div class="mt-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %} #}
+    </div>
+{% endblock %}

@@ -1,0 +1,51 @@
+<!--
+_______________________________________________________________________________
+
+                            PAGE DE BASE QR CODE
+_______________________________________________________________________________
+
+Description :
+-------------
+Page de base pour l'affichage des QR Code
+
+-->
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}QR Code{% endblock %}</title>
+
+    <!-- Icone de l'onglet de navigation : -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ static('images/icons/QRCode_16x16.png') }}">
+
+    <!-- Importation de Bootstrap 5 (partie CSS) : -->
+    <link rel="stylesheet" href="{{ static('bootstrap/dist/css/bootstrap.min.css') }}">
+
+    <!-- Importation des icônes de Bootstrap -->
+    <link rel="stylesheet" href="{{ static('bootstrap-icons/font/bootstrap-icons.css') }}">
+
+    <!-- Importation du fichier de style CSS : -->
+    <link rel="stylesheet" href="{{ static('css/style.css') }}">
+
+
+{% block style %}
+    {#    ZONE POUR PLACE DU STYLE CSS COMPLEMENTAIRE#}
+{% endblock %}
+
+</head>
+
+<body class="">
+    {% block content %}
+
+
+
+    {% endblock %}
+
+    <!-- Importation de Bootstrap 5 (partie JS) : -->
+    <script src="{{ static('bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!--
+_______________________________________________________________________________
+
+                 PAGE UPLOAD DES FICHIERS PHOTOS A TRAITER
+_______________________________________________________________________________
+
+Description :
+-------------
+Cette page du template définira la page de récupération des fichiers photos qui vont
+être traités.
+-->
+
+
+
+{% extends 'core/base.html' %}
+
+{% block title %} {{ SITE_NAME }}: Upload {% endblock %}
+
+<!-- Insertion des boutons : -->
+{% block nav_buttons %}
+    {% include 'ad_agt/fragments/ad_agt_nav_buttons.html' %}
+{% endblock %}
+
+
+{% block content %}
+    <!-- Marge supérieure -->
+    <div class="container" style="height: 130px"></div>
+
+
+    <div class="container justify-content-center">
+        <!-- Inclusion du formulaire d'upload des photos : -->
+{#      {% include 'core/fragments/forms/form_upload_photos.html' %}#}
+        {% include 'core/fragments/forms/form_upload_photos_filepond.html' %}
+    </div>
+
+{% endblock %}

@@ -1,0 +1,106 @@
+<!--
+_______________________________________________________________________________
+
+                                    PAGE DE BASE
+_______________________________________________________________________________
+
+Description :
+-------------
+Cette page du template reçoit le contenu des autres pages.
+Il permet ainsi de définir l'entête et le pied de page de toutes les pages de l'application.
+-->
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="App-Web pour la gestion et génération des trombinoscopes">
+    <meta name="author" content="Team SIO LdV">
+
+    <!-- Titre du site : -->
+    <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
+
+    <!-- Icone de l'onglet de navigation : -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ static('images/icons/ldv_16x16.png') }}">
+
+    <!-- Importation de Bootstrap 5 (partie CSS) : -->
+    <link rel="stylesheet" href="{{ static('bootstrap/dist/css/bootstrap.min.css') }}">
+
+    <!-- Importation des icônes de Bootstrap -->
+    <link rel="stylesheet" href="{{ static('bootstrap-icons/font/bootstrap-icons.css') }}">
+
+    <!-- Importation de FilePond (Enrichissement de l'interface d'upload de fichiers) : -->
+    <link href="{{ static('filepond/dist/filepond.css') }}" rel="stylesheet">
+    <link href="{{ static ('filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css') }}" rel="stylesheet">
+
+    <!-- Importation de Cropper js : -->
+    <link rel="stylesheet" href="{{ static('cropperjs/dist/cropper.css') }}">
+
+    <!-- Importation du fichier de style CSS : -->
+    <link rel="stylesheet" href="{{ static('css/style.css') }}">
+
+    <!-- Block extra-style : -->
+    {% block extra_style %}{% endblock %}
+
+
+</head>
+
+
+<body>
+
+    <!-- -------------------------------------------------------- -->
+    <!-- ENTETE & NAVIGATION                                      -->
+    <!-- -------------------------------------------------------- -->
+
+    <!-- HEADER : -->
+    <header class="pb-5 fixed-top">
+        {% block header %}
+            {% include 'core/fragments/base/header.html' %}
+        {% endblock %}
+
+        <!-- NAVBAR : -->
+        <nav>
+            <!-- Zone des boutons de navigation : -->
+            <div class="row ">
+                <div class="col-7 ms-auto rounded-bottom-4 mt-0 pb-2 pt-1 shadow"
+                     style="background-color: rgba(74, 74, 74, 0.68);">
+
+                    <!-- Insertion des boutons : -->
+                    {% block nav_buttons %}
+                        {% include 'core/fragments/core_nav_buttons.html' %}
+                    {% endblock %}
+                </div>
+            </div>
+        </nav>
+
+    </header>
+
+
+    <!-- -------------------------------------------------------- -->
+    <!-- CONTENU PRINCIPAL                                        -->
+    <!-- -------------------------------------------------------- -->
+
+    <main class="pt-3 pb-3">
+        {% block content %}{% endblock %}
+    </main>
+
+
+    <!-- -------------------------------------------------------- -->
+    <!-- FOOTER                                                   -->
+    <!-- -------------------------------------------------------- -->
+
+    <footer class="fixed-bottom mt-5">
+        {% include 'core/fragments/base/footbar.html' %}
+    </footer>
+
+    <!-- Import de scripts en fin de body : -->
+    {% block extra_script %}{% endblock %}
+
+    <!-- Importation de Bootstrap 5 (partie JS) : -->
+    <script src="{{ static('bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+
+
+
+</body>

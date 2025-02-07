@@ -1,0 +1,158 @@
+<!--
+_______________________________________________________________________________
+
+                                FRAGMENT : modal_photo
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient le modal permettant d'afficher la photo et de mieux définir le rognage.
+-->
+
+<style>
+.modal-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    max-height: 80vh; /* Empêche l’image de dépasser l’écran */
+    overflow: hidden;
+}
+
+.modal-body img {
+    display: block;
+    width: 100%;        /* Forcer l’image à prendre toute la largeur */
+    height: auto;       /* Préserver les proportions */
+    max-height: 80vh;   /* Empêcher qu'elle ne dépasse la hauteur de l’écran */
+}
+
+/* Appliquer ces styles à Cropper.js */
+.cropper-container {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+}
+
+
+</style>
+
+<div class="modal" id="modal-crop-{{ photo.id }}" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- Titre du modal : -->
+      <div class="modal-header bg-dark border-bottom-1 border-warning">
+          <h5 class="modal-title text-warning fw-bold"><b>Rognage de l'image : </b><span class="text-light" style="font-size: 0.8em;">{{ photo.file_name }}</span></h5>
+        <button type="button" class="btn-close bg-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Corps du modal : -->
+      <div class="modal-body">
+        <img src="{{ photo.image.url }}"
+         class="img-fluid"
+         alt="{{ photo.file_name }}"
+         id="idImgPrev-modal-{{ photo.id }}"
+         >
+      </div>
+
+      <!-- Pied du modal : -->
+      <div class="modal-footer bg-dark border-top-1 border-warning">
+
+        <!-- Bouton pour sauvegarder les valeurs pour leur rognage : -->
+        <button id="cropBtn-{{ photo.id }}"
+                class="btn btn-warning"
+                title="Appliquer le rognage">
+                    <i class="bi bi-scissors"></i>
+        </button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Script JS de Cropper.js -->
+<script src="{{ static('cropperjs/dist/cropper.min.js') }}"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("modal-crop-{{ photo.id }}");
+    const previewModal = document.getElementById("idImgPrev-modal-{{ photo.id }}");
+    let cropperModal = null;
+
+    // Initialiser Cropper.js quand le modal s'affiche
+    modal.addEventListener("shown.bs.modal", function () {
+        if (!cropperModal) {
+            cropperModal = new Cropper(previewModal, {
+                aspectRatio: 35 / 45, // Optionnel
+                viewMode: 2,
+                autoCropArea: 1,
+                responsive: true,
+                scalable: true,
+                zoomable: true,
+                ready() {
+                    cropperModal.setData({
+                        x: {{ photo.crop_x }},
+                        y: {{ photo.crop_y }},
+                        width: {{ photo.crop_width }},
+                        height: {{ photo.crop_height }}
+                    });
+                    setTimeout(() => {
+                        previewModal.style.width = "100%";
+                        previewModal.style.height = "auto";
+                    }, 100);
+                }
+            });
+        }
+    });
+
+    // Détruire Cropper.js quand on ferme le modal
+    modal.addEventListener("hidden.bs.modal", function () {
+        if (cropperModal) {
+            cropperModal.destroy();
+            cropperModal = null;
+        }
+    });
+
+    // Sauvegarde du rognage
+    document.getElementById("cropBtn-{{ photo.id }}").addEventListener("click", () => {
+        if (cropperModal) {
+            const cropData = cropperModal.getData();
+
+            fetch("save-crop-coordinates/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": '<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">',
+                },
+                body: JSON.stringify({
+                    photo_id: {{ photo.id }},
+                    crop_x: cropData.x,
+                    crop_y: cropData.y,
+                    crop_width: cropData.width,
+                    crop_height: cropData.height
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Coordonnées sauvegardées:", data);
+
+                // Fermer le modal après la sauvegarde
+                const modalElement = document.getElementById("modal-crop-{{ photo.id }}");
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                modalInstance.hide();
+
+                // Recharger la page après une courte pause
+                setTimeout(() => {
+                    location.reload();
+                }, 50);  // Pause de 500ms pour éviter un effet brutal
+            })
+            .catch(error => console.error("Erreur lors de la sauvegarde:", error));
+        }
+    });
+});
+
+</script>
+

@@ -1,0 +1,110 @@
+<!--
+_______________________________________________________________________________
+
+                                FRAGMENT : modal_selection_eleve
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient le modal permettant d'afficher la photo et de choisir un élève non affecté.
+-->
+
+<div class="modal" id="modal-select-{{ photo.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <!-- Titre du modal : -->
+            <div class="modal-header bg-dark border-botoom-1 border-warning">
+                <h5 class="modal-title text-warning"><b>Association élève : </b><span class="text-light" style="font-size: 0.8em;">{{ photo.file_name }}</span></h5>
+                <button type="button" class="btn-close bg-danger" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Corps du modal : -->
+            <div class="modal-body">
+                <img src="{{ photo.image.url }}"
+                     class="img-fluid"
+                     alt="{{ photo.file_name }}"
+                     id="idImgPrev-modal-{{ photo.id }}">
+            </div>
+
+            <!-- Pied du modal : -->
+            <div class="modal-footer bg-dark border-top-1 border-warning">
+                <div class="w-100">
+                    <p class="text-start text-light ms-2 mb-0">Choisir un élève dans la liste des élèves sans photo associée :</p>
+                </div>
+                <!-- Sélection de l'élève et bouton alignés -->
+                <div class="row w-100 align-items-center">
+                    <div class="col-8">
+                        <select class="form-select" aria-label="Sélection d'un élève">
+                            {% for student in students_without_photo %}
+                                <option>
+                                    {{ student.last_name }} {{ student.first_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-4 text-end">
+                        <button id="save-{{ photo.id }}"
+                                class="btn btn-warning"
+                                title="Enregistrer l'association"
+                                data-photo-id="{{ photo.id }}">
+                            <i class="bi bi-floppy2-fill"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Sélectionner le bouton de sauvegarde
+    const saveButton = document.getElementById("save-{{ photo.id }}");
+
+    // Ajouter un écouteur d'événement pour le clic
+    saveButton.addEventListener("click", function () {
+        // Récupérer l'ID de la photo
+        const photoId = saveButton.getAttribute("data-photo-id");
+
+        // Récupérer l'élève sélectionné dans la liste déroulante
+        const selectElement = document.querySelector(`#modal-select-{{ photo.id }} select`);
+        const selectedStudentName = selectElement.value; // Récupère le nom complet de l'élève
+
+        // Extraire le nom et le prénom de l'élève
+        const [lastName, firstName] = selectedStudentName.split(" ");
+
+        // Envoyer une requête AJAX pour mettre à jour la base de données
+        fetch(`update-student-association/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": '<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">',  // Ajouter le jeton CSRF pour la sécurité
+            },
+            body: JSON.stringify({
+                photo_id: photoId,
+                last_name: lastName,
+                first_name: firstName,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                //alert("L'association a été mise à jour avec succès !");
+                // Recharger la page pour afficher les modifications
+                window.location.reload();
+            } else {
+                alert("Une erreur s'est produite lors de la mise à jour.");
+            }
+        })
+        .catch(error => {
+            console.error("Erreur :", error);
+            alert("Une erreur s'est produite lors de la mise à jour.");
+        });
+    });
+});
+</script>

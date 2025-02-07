@@ -1,0 +1,37 @@
+<!--
+_______________________________________________________________________________
+
+                       PAGE D'INSCRIPTION DES ELEVES
+_______________________________________________________________________________
+
+Description :
+-------------
+Cette page du template définira la page d'inscription des étudiants.
+-->
+
+
+
+{% extends 'core/base.html' %}
+
+{% block title %} {{ SITE_NAME }}: Inscription {% endblock %}
+
+<!-- Insertion des boutons : -->
+{% block nav_buttons %}
+    {% include 'ad_a2p/fragments/ad_a2p_nav_buttons.html' %}
+{% endblock %}
+
+
+{% block content %}
+    <!-- Marge supérieure -->
+    <div class="container" style="height: 130px"></div>
+
+
+    <div class="container justify-content-center">
+        <!-- Inclusion du formulaire de saisie manuelle d'un élève : -->
+        {% include 'core/fragments/forms/form_student_fill.html' %}
+
+        <!-- Inclusion du formulaire d'import/export des élèves : -->
+        {% include 'core/fragments/forms/form_students_list_import_export.html' %}
+    </div>
+
+{% endblock %}

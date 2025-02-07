@@ -1,0 +1,69 @@
+<!--
+_______________________________________________________________________________
+
+                                FRAGMENT : form-fill-student
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient le formulaire de saisie manuelle d'un nouvel élève avec son wrapper
+-->
+
+{% extends 'core/fragments/wrappers/wrapper_standard.html' %}
+
+{% block name_icon %}bi-keyboard-fill{% endblock %}
+{% block title %}Saisie manuelle d'un nouvel élève{% endblock %}
+
+
+<!-- Insertion du formulaire : -->
+{% block wrapper_content %}
+    <!-- Instructions pour l'utilisateur : -->
+    <div class="container mt-3 mb-4">
+        <div class="row col h4 ms-2">Veuillez saisir les informations sur l'élève :</div>
+
+        <form method="POST" class="g-5 mt-3">
+            <!-- Récupération du token csrf : -->
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            {#{% csrf_token %}#}
+
+            <!-- Champ Nom -->
+            <div class="row col-8 mt-2 ms-2 mb-4">
+                <label for="{{ form.last_name.id_for_label }}" class="form-label fw-bold">Nom de famille :</label>
+                {{ form.last_name }}
+            </div>
+
+            <!-- Champ Prénom -->
+            <div class="row col-8 mt-2 ms-2 mb-4">
+                <label for="{{ form.first_name.id_for_label }}" class="form-label fw-bold">Prénom :</label>
+                {{ form.first_name }}
+            </div>
+
+            <!-- Erreurs générales -->
+            {% if form.non_field_errors %}
+                <div class="text-danger fw-bold ms-4">
+                    {% for error in form.non_field_errors() %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Message de confirmation de la création d'un élève -->
+            {% if messages %}
+                <div class="text-success fw-bold ms-4">
+                    {% for message in messages %}
+                           <p>{{ message }}<p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Bouton de validation : -->
+            <div class="row">
+                <div class="col-8 m-auto">
+                    <button type="submit" class="btn btn-success w-50 fw-bold" title="Cliquer pour ajouter l'élève à la liste." aria-label="Bouton de validation pour ajouter l'élève">
+                        <i class="bi bi-person-fill-check me-2"></i>Ajouter élève
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

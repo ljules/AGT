@@ -1,0 +1,72 @@
+<!--
+_______________________________________________________________________________
+
+                                FRAGMENT : ad_agt-nav-buttons
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient les boutons de navigation de l'Application Django - Aide Prise de Portraits.
+-->
+
+
+<div class="d-flex me-0">
+
+<div class="btn-group ms-auto"></div>
+
+    <!-- Bouton home : -->
+    <a      href="{{ url('core:index') }}"
+            title="Retour à la page d'accueil."
+            class="d-flex align-items-center justify-content-center btn btn-dark w-100 p-0 me-1
+            {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'index' %}
+                            active fw-bold text-warning"
+                            aria-current="page"
+            {% else %}"{% endif %}>
+            <i class="bi bi-house-fill me-1" style="font-size: 1.5em;"></i>
+            <span class="d-none d-sm-block" style="font-size: 0.8em;">Accueil</span>
+    </a>
+
+
+    <!-- Bouton accès upload des photos : -->
+    <a      href="{{ url('ad_agt:upload_photos') }}"
+            title="Récupération des photos originales"
+            class="d-flex align-items-center justify-content-center btn btn-dark w-100 p-0 me-1
+
+            {% if request.resolver_match.namespace == 'ad_agt' and request.resolver_match.url_name == 'upload_photos' %}
+                            active fw-bold text-warning"
+                            aria-current="page"
+            {% else %}"{% endif %}>
+            <i class="bi bi-upload me-1" style="font-size: 1.5em;"></i>
+            <span class="d-none d-sm-block" style="font-size: 0.8em;">Upload</span>
+    </a>
+
+
+    <!-- Bouton accès traitement des photos : -->
+    <a      href="{{ url('ad_agt:home_handler') }}"
+            title="Accéder au traitement des photos."
+            class="d-flex align-items-center justify-content-center btn btn-dark w-100 p-0 me-1
+
+            {% if request.resolver_match.namespace == 'ad_agt' and request.resolver_match.url_name == 'home_handler' %}
+                            active fw-bold text-warning"
+                            aria-current="page"
+            {% else %}"{% endif %}>
+            <i class="bi bi-person-fill-gear me-1" style="font-size: 1.5em;"></i>
+            <span class="d-none d-sm-block" style="font-size: 0.8em;">Traitement</span>
+    </a>
+
+
+    <!-- Bouton accès download des photos : -->
+    <a      href="{{ url('ad_agt:download_photos') }}"
+            title="Récupération des photos traitées"
+            class="d-flex align-items-center justify-content-center btn btn-dark w-100 p-0 me-1
+
+            {% if request.resolver_match.namespace == 'ad_agt' and request.resolver_match.url_name == 'download_photos' %}
+                            active fw-bold text-warning"
+                            aria-current="page"
+            {% else %}"{% endif %}>
+            <i class="bi bi-download me-1" style="font-size: 1.5em;"></i>
+            <span class="d-none d-sm-block" style="font-size: 0.8em;">Download</span>
+    </a>
+
+</div>
+

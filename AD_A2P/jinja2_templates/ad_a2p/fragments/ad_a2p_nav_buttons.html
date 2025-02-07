@@ -1,0 +1,67 @@
+<!--
+_______________________________________________________________________________
+
+                                FRAGEMENT : ad_a2p-nav-buttons
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient les boutons de navigation de l'Application Django - Aide Prise de Portraits.
+-->
+
+
+<div class="d-flex me-0">
+
+<div class="btn-group ms-auto"></div>
+
+    <!-- Bouton home : -->
+    <a      href="{{ url('core:index') }}"
+            title="Retour à la page d'accueil."
+            class="d-flex align-items-center justify-content-center btn btn-dark w-100 p-0 me-1
+            {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'index' %}
+                            active fw-bold text-warning"
+                            aria-current="page"
+            {% else %}"{% endif %}>
+            <i class="bi bi-house-fill me-1" style="font-size: 1.5em;"></i>
+            <span class="d-none d-sm-block" style="font-size: 0.8em;">Accueil</span>
+    </a>
+
+
+    <!-- Bouton accès à la saisie des élèves : -->
+    <a      href="{{ url('ad_a2p:students_sign_up') }}"
+            title="Accéder à la saisie des élèves avant prise photo."
+            class="d-flex align-items-center justify-content-center btn btn-dark w-100 p-0 me-1
+            {% if request.resolver_match.namespace == 'ad_a2p' and request.resolver_match.url_name == 'students_sign_up' %}
+                            active fw-bold text-warning"
+                            aria-current="page"
+            {% else %}"{% endif %}>
+            <i class="bi bi-person-fill-add me-1" style="font-size: 1.5em;"></i>
+            <span class="d-none d-sm-block" style="font-size: 0.8em;">Saisie</span>
+    </a>
+
+    <!-- Bouton accès à la liste d'édition : -->
+    <a      href="{{ url('ad_a2p:students_editor') }}"
+            title="Accéder à la liste d'édition des élèves."
+            class="d-flex align-items-center justify-content-center btn btn-dark w-100 p-0 me-1
+
+            {% if request.resolver_match.namespace == 'ad_a2p' and request.resolver_match.url_name == 'students_editor' %}
+                            active fw-bold text-warning"
+                            aria-current="page"
+            {% else %}"{% endif %}>
+            <i class="bi bi-card-list me-1" style="font-size: 1.5em;"></i>
+            <span class="d-none d-sm-block" style="font-size: 0.8em;">Edition</span>
+    </a>
+
+    <!-- Bouton accès affichage des QR Codes : -->
+    <a      href="{{ url ('ad_a2p:qr_code_tab') }}"
+            title="Afficher les QR codes pour la prise de photo."
+            class="d-flex align-items-center justify-content-center btn btn-dark w-100 p-0 me-1
+            {% if request.resolver_match.namespace == 'ad_a2p' and request.resolver_match.url_name == 'qr_code_tab' %}
+                            active fw-bold text-warning"
+                            aria-current="page"
+            {% else %}"{% endif %}>
+            <i class="bi bi-qr-code me-1"style="font-size: 1.5em;"></i>
+            <span class="d-none d-sm-block" style="font-size: 0.8em;">QR Code</span>
+    </a>
+</div>
+

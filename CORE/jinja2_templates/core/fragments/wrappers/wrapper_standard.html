@@ -1,0 +1,28 @@
+<!--
+_______________________________________________________________________________
+
+                                FRAGMENT : wrapper-standard
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient le wrapper (boîte enveloppe) par défaut/classique
+qui contient les éléments à afficher dans les pages.
+-->
+
+
+<div class = "container p-0 mt-4 mb-4">
+        <!-- Barre de titre : -->
+        <div class="row col-10 m-0 ps-2 pt-2 pb-2 bg-warning rounded-top-4 fw-bold" style="font-size:1.5em ;">
+            <span><i class="bi {% block name_icon %}{{ name_icon }}{% endblock %} me-2" style="color: rgb(160, 80, 0);"></i>
+                <span class="text-dark">{% block title %}{{ title }}{% endblock %}</span>
+            </span>
+        </div>
+
+        <!-- Contenu de la section : -->
+        <div class="row m-0 p-0 bg-light border border-2 border-warning shadow rounded-bottom-4">
+            {% block wrapper_content %}
+                {{ content|safe }}
+            {% endblock %}
+        </div>
+</div>

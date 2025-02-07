@@ -1,0 +1,47 @@
+<!--
+_______________________________________________________________________________
+
+                            FRAGMENT : form_upload_photos
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de traitement.
+-->
+
+{% extends 'core/fragments/wrappers/wrapper_standard.html' %}
+
+{% block name_icon %}bi-upload{% endblock %}
+{% block title %}Envoi des photo sur le serveur{% endblock %}
+
+
+<!-- Insertion du formulaire : -->
+{% block wrapper_content %}
+    <!-- Instructions pour l'utilisateur : -->
+    <div class="container mt-3 mb-4">
+        <div class="row col h4 ms-2">Veuillez cibler le dossier contenant vos photos et
+            les uploader sur le serveur.
+        </div>
+
+        <!-- Message info après upload : -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" class="g-5 mt-3">
+            <!-- Récupération du token csrf : -->
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            {#{% csrf_token %}#}
+
+            {{ form.images }}
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+
+{% endblock %}

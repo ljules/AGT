@@ -1,0 +1,110 @@
+<!--
+_______________________________________________________________________________
+
+                        FRAGMENT : form_upload_photos_filepond
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de traitement.
+-->
+
+<style>
+    /* Personnaliser le conteneur principal */
+    .filepond--root {
+        height: 400px;
+        border: solid 2px #8e8e8e;
+        border-radius: 10px;
+    }
+
+    /* Personnaliser la zone de glisser-déposer */
+    .filepond--drop-label {
+        margin: 2px;
+        color: #555;
+        background-color: #e1e1e1;
+        border-radius: 10px;
+    }
+
+    /* Personnaliser les boutons */
+    .filepond--label-action {
+        color: #007bff;
+        text-decoration: underline;
+    }
+
+
+</style>
+
+{% extends 'core/fragments/wrappers/wrapper_standard.html' %}
+
+{% block name_icon %}bi-upload{% endblock %}
+{% block title %}Envoi des photo sur le serveur{% endblock %}
+
+
+<!-- Insertion du formulaire : -->
+{% block wrapper_content %}
+    <!-- Instructions pour l'utilisateur : -->
+    <div class="container mt-3 mb-4">
+        <div class="row col h4 ms-2">Veuillez cibler le dossier contenant vos photos et
+            les uploader sur le serveur.
+        </div>
+
+        <!-- Message info après upload : -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Formulaire d'upload :-->
+        <form method="POST" enctype="multipart/form-data" class="g-5 mt-3">
+            <!-- Récupération du token csrf : -->
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            {#{% csrf_token %}#}
+
+            <input type="file" name="images" id="images" multiple>
+
+        </form>
+    </div>
+
+
+    <!-- Importation FilePond (partie JS) : -->
+    <script src="{{ static('filepond/dist/filepond.js') }}"></script>
+    <script src="{{ static('filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js') }}"></script>
+    <script src="{{ static('filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js') }}"></script>
+
+    <script>
+        // Initialiser FilePond
+        FilePond.registerPlugin(FilePondPluginImagePreview, FilePondPluginFileValidateType);
+
+        const inputElement = document.querySelector('input[id="images"]');
+        const pond = FilePond.create(inputElement, {
+            allowMultiple: true,
+            acceptedFileTypes: ['image/*'],
+            labelIdle: 'Glissez-déposez vos photos ou <span class="filepond--label-action">Parcourir</span>',
+            allowImagePreview: true,
+            imagePreviewHeight: 70,
+        });
+
+        // Envoyer les fichiers au serveur :
+        FilePond.setOptions({
+            server: {
+                url: '',
+                process: {
+                    method: 'POST',
+                    revert: null, // Désactive la suppression de fichier, sinon renseigner l'url ex : "/delete-photo/"
+                    headers: {
+                        'X-CSRFToken': '<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">',
+                    },
+                },
+            },
+            fileRenameFunction: (file) => {
+                return file.name;  // Conserve le nom du fichier tel quel
+            },
+        });
+    </script>
+
+{% endblock %}

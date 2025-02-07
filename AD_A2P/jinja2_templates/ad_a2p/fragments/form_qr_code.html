@@ -1,0 +1,91 @@
+<!--
+_______________________________________________________________________________
+
+                                FRAGEMENT : form_qr_code
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient le formulaire affichant le QR Code et la liste des élèves.
+-->
+
+
+
+<!-- Conteneur principal avec flexbox -->
+<div class="d-flex flex-column h-100">
+    <!-- Zone QR Code qui prendra tout l'espace disponible -->
+    <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+        <img class="img-fluid"
+             id="qr-code-image"
+             src="{{ MEDIA_URL }}qr_codes/qr_student_id_{{ selected_student.id }}.png"
+             alt="Image du QR Code de {{ selected_student.last_name }} {{ selected_student.first_name }}"
+             style="height: 75vh; object-fit: contain;">
+    </div>
+
+    <!-- Formulaire en bas qui restera à taille fixe -->
+    <form method="GET" id="student-selection-form" class="mt-1">
+        <div class="row pb-1 pt-1 align-items-end justify-content-center">
+
+            <!-- Bouton élève précédent -->
+            <div class="col-auto p-0 text-end ms-3">
+                <button type="button"
+                        class="btn btn-success"
+                        id="prev-student"
+                        style="font-size: 1em;">
+                    <i class="bi bi-caret-left-fill"></i>
+                </button>
+            </div>
+
+            <!-- Liste déroulante des élèves -->
+            <div class="col mt-0 mb-0">
+                <label for="listeQRcodesEleves" class="form-label"></label>
+                <select class="form-select custom-select fw-bold p-0"
+                        id="listeQRcodesEleves"
+                        name="student_id"
+                        aria-label="Choisir un QR Code élève à afficher"
+                        style="font-size: 1.5em; text-align: center;"
+                        onchange="document.getElementById('student-selection-form').submit();">
+                    {% for student in students %}
+                        <option value="{{ student.id }}" {% if student.id == selected_student.id %}selected{% endif %}>
+                            {{ student.last_name }} {{ student.first_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Bouton élève suivant -->
+            <div class="col-auto p-0 text-start me-3">
+                <button type="button"
+                        class="btn btn-success"
+                        id="next-student"
+                        style="font-size: 1em;">
+                    <i class="bi bi-caret-right-fill"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<!-- Script pour les boutons de sélection gauche/droit : -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const selectElement = document.getElementById("listeQRcodesEleves");
+        const prevButton = document.getElementById("prev-student");
+        const nextButton = document.getElementById("next-student");
+
+        prevButton.addEventListener("click", function() {
+            if (selectElement.selectedIndex > 0) {
+                selectElement.selectedIndex -= 1;
+                selectElement.form.submit();
+            }
+        });
+
+        nextButton.addEventListener("click", function() {
+            if (selectElement.selectedIndex < selectElement.options.length - 1) {
+                selectElement.selectedIndex += 1;
+                selectElement.form.submit();
+            }
+        });
+    });
+</script>

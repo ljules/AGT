@@ -1,0 +1,216 @@
+<!--
+_______________________________________________________________________________
+
+                       PAGE D'AFFICHAGE QR CODE SUR ENI
+_______________________________________________________________________________
+
+Description :
+-------------
+Cette page du template définira la page d'affichage des QR Codes sur un ENI.
+-->
+
+{% extends 'ad_a2p/base_qr_code.html' %}
+
+{% block style %}
+    <style>
+        /* Conteneur principal avec affichage flex */
+        .container-flex {
+            display: flex;
+            height: 100vh;  /* Prend toute la hauteur de la fenêtre */
+            width: 100vw;   /* Prend toute la largeur */
+            overflow: hidden; /* Empêche le dépassement */
+        }
+
+        /* Zone gauche */
+        .left-panel {
+            flex: 1;
+            background-color: lightblue;
+            padding: 20px;
+            overflow: auto;
+            position: relative; /* Permet de positionner le sélecteur de couleur */
+        }
+
+        /* Positionnement du bouton de bascule en haut à gauche du panneau de droite */
+        .flip-button-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1050;
+        }
+
+
+
+        /* Zone droite */
+        .right-panel {
+            flex: 1;
+            background-color: #86ff2f;
+            padding: 20px;
+            overflow: auto;
+            position: relative; /* Permet de positionner correctement le bouton de bascule */
+        }
+
+
+        /* Séparateur draggable */
+        .resizer {
+            width: 5px;
+            background-color: gray;
+            cursor: ew-resize;
+            position: relative;
+            flex: 0 0 5px; /* Assure que la barre reste visible après redimensionnement */
+        }
+
+        .resizer:active,
+        .resizer:focus {
+            background-color: darkgray;
+        }
+
+        /* Conteneur du sélecteur de couleur */
+        .color-picker-container {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-picker-container input[type="color"] {
+            border: none;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-flex">
+
+        <!-- Panneau gauche avec sélection de couleur -->
+        <div class="left-panel" id="leftPanel">
+            <div class="color-picker-container">
+                <label for="colorPicker" class="fw-bold">Choisir une couleur :</label>
+                <input type="color" id="colorPicker" value="#ADD8E6">
+            </div>
+        </div>
+        <!-- Séparateur draggable -->
+        <div class="resizer" id="dragbar"></div>
+
+        <!-- Panneau droit avec affichage du QR Code -->
+        <div class="right-panel h-100">
+
+        {% block close_button %}
+            <!-- Bouton de fermeture -->
+            <a      href="{{ url('ad_a2p:students_sign_up') }}"
+                    type="button"
+                    class="btn d-flex justify-content-center rounded-2 p-0"
+                    style="position: fixed; z-index: 1050; top: 5px; right: 5px; font-size: 1.2em; color: white; background-color: rgb(135, 3, 3); z-index: 1000;"
+                    title="Fermer">
+                <i class="me-2 ms-2 bi bi-x"></i>
+            </a>
+            {% endblock %}
+
+        {% block flip_button %}
+            <!-- Bouton de bascule affichage mode tablette/eni -->
+            <div class="flip-button-container">
+                <a href="{{ url('ad_a2p:qr_code_tab') }}"
+                   type="button"
+                   class="btn btn-secondary d-flex justify-content-center rounded-2 p-2"
+                   style="width: 45px;"
+                   title="Basculer l'affichage en mode tablette/ENI">
+                        <i class="bi bi-tablet-landscape-fill"></i>
+                </a>
+            </div>
+        {% endblock %}
+
+
+
+            <!-- QR Code & son formulaire -->
+            {% include 'ad_a2p/fragments/form_qr_code.html' %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const resizer = document.getElementById("dragbar");
+            const leftPanel = document.getElementById("leftPanel");
+            const rightPanel = document.querySelector(".right-panel");
+            const colorPicker = document.getElementById("colorPicker");
+            let isResizing = false;
+
+            /* Charge les dimensions sauvegardées */
+            function loadPanelSizes() {
+                const savedLeftWidth = localStorage.getItem("leftPanelWidth");
+                const savedRightWidth = localStorage.getItem("rightPanelWidth");
+                if (savedLeftWidth && savedRightWidth) {
+                    leftPanel.style.flex = `0 0 ${savedLeftWidth}%`;
+                    rightPanel.style.flex = `0 0 ${savedRightWidth}%`;
+                    resizer.style.flex = "0 0 5px";
+                }
+            }
+
+            /* Sauvegarde les dimensions actuelles */
+            function savePanelSizes(leftWidth, rightWidth) {
+                localStorage.setItem("leftPanelWidth", leftWidth);
+                localStorage.setItem("rightPanelWidth", rightWidth);
+            }
+
+            /* Gestion du redimensionnement */
+            resizer.addEventListener("mousedown", function (event) {
+                isResizing = true;
+                document.addEventListener("mousemove", handleResize);
+                document.addEventListener("mouseup", stopResize);
+                document.body.style.userSelect = "none";
+                document.body.style.cursor = "ew-resize";
+            });
+
+            function handleResize(event) {
+                if (!isResizing) return;
+
+                const containerWidth = resizer.parentNode.offsetWidth;
+                const newLeftWidth = (event.clientX / containerWidth) * 100;
+                const newRightWidth = 100 - newLeftWidth;
+
+                if (newLeftWidth > 10 && newRightWidth > 10) {
+                    leftPanel.style.flex = `0 0 ${newLeftWidth}%`;
+                    rightPanel.style.flex = `0 0 ${newRightWidth}%`;
+                    resizer.style.flex = "0 0 5px";
+                    savePanelSizes(newLeftWidth, newRightWidth);
+                }
+            }
+
+            function stopResize() {
+                if (isResizing) {
+                    isResizing = false;
+                    document.removeEventListener("mousemove", handleResize);
+                    document.removeEventListener("mouseup", stopResize);
+                    document.body.style.userSelect = "";
+                    document.body.style.cursor = "";
+                    resizer.style.flex = "0 0 5px";
+                }
+            }
+
+            /* Charge la couleur du panneau gauche */
+            function loadPanelColor() {
+                const savedColor = localStorage.getItem("leftPanelColor");
+                if (savedColor) {
+                    leftPanel.style.backgroundColor = savedColor;
+                    colorPicker.value = savedColor;
+                }
+            }
+
+            /* Sauvegarde la nouvelle couleur sélectionnée */
+            colorPicker.addEventListener("input", function () {
+                const newColor = colorPicker.value;
+                leftPanel.style.backgroundColor = newColor;
+                localStorage.setItem("leftPanelColor", newColor);
+            });
+
+            loadPanelSizes();
+            loadPanelColor();
+        });
+    </script>
+{% endblock %}
