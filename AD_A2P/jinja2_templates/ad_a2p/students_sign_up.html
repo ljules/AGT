@@ -25,13 +25,10 @@ Cette page du template définira la page d'inscription des étudiants.
     <!-- Marge supérieure -->
     <div class="container" style="height: 130px"></div>
 
+    <!-- Inclusion du formulaire de saisie manuelle d'un élève : -->
+    {% include 'core/fragments/forms/form_student_fill.html' %}
 
-    <div class="container justify-content-center">
-        <!-- Inclusion du formulaire de saisie manuelle d'un élève : -->
-        {% include 'core/fragments/forms/form_student_fill.html' %}
-
-        <!-- Inclusion du formulaire d'import/export des élèves : -->
-        {% include 'core/fragments/forms/form_students_list_import_export.html' %}
-    </div>
+    <!-- Inclusion du formulaire d'import/export des élèves : -->
+    {% include 'core/fragments/forms/form_students_list_import_export.html' %}
 
 {% endblock %}

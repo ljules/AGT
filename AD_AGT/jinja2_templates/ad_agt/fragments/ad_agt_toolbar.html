@@ -1,0 +1,239 @@
+<!--
+_______________________________________________________________________________
+
+                                FRAGMENT : ad_agt-toolbar
+_______________________________________________________________________________
+
+Description :
+-------------
+Fragment pour la barre d'outils du module de traitement des photos
+-->
+
+
+
+<div class="container">
+    <div class="row col-4 rounded-top-4 bg-dark text-warning pt-2">
+        <h5>Outils</h5>
+    </div>
+    <div class="row border-top border-dark border-4 bg-secondary shadow" style="min-height: 50px;">
+
+        <!-- Recadrage automatique de toutes les photos : -->
+        <div class="col-2 m-1">
+            <button type="button"
+                    class="btn btn-info pt-1 pb-1 ps-2 pe-2 d-flex align-items-center justify-content-center"
+                    style="font-size: 1.4em;"
+                    title="Recadrer toutes les photos automatiquement"
+                    aria-label="Recadrer toutes les photos automatiquement"
+                    id="crop-button">
+                <i class="bi bi-person-bounding-box"></i><span class="ms-2 d-none d-md-block" style="font-size: 0.6em">Recadrage</span>
+            </button>
+        </div>
+
+
+        <!-- Lecture des QR Codes : -->
+        <div class="col-2 m-1">
+            <button type="button"
+                    class="btn btn-info pt-1 pb-1 ps-2 pe-2 d-flex align-items-center justify-content-center"
+                    style="font-size: 1.4em;"
+                    title="Lire tous les QR Codes des photos"
+                    aria-label="Lire tous les QR Codes des photos"
+                    id="read-all-qr-codes-button">
+                <i class="bi bi-qr-code-scan"></i> <span class="ms-2 me-4 d-none d-md-block" style="font-size: 0.6em;">Lire</span>
+            </button>
+        </div>
+
+        <!-- Bouton de suppression des liens photos/étudiants : -->
+        <div class="col-2 m-1">
+            <button type="button"
+                    class="btn btn-warning pt-1 pb-1 ps-2 pe-2 d-flex align-items-center justify-content-center"
+                    style="font-size: 1.4em;"
+                    title="Supprimer tous les liens des élèves avec les photos"
+                    aria-label="Supprimer tous les liens des élèves avec les photos"
+                    id="removeAllStudentsBtn"
+                    data-photos="{{ photos }}">
+                        <i class="bi bi-person-fill-x"></i> <span class="ms-2 me-4 d-none d-md-block" style="font-size: 0.6em">Tous</span>
+            </button>
+        </div>
+
+        <!-- Bouton de suppression de toutes les photos & fichiers : -->
+        <div class="col-2 m-1">
+            <button type="button"
+                    class="btn btn-danger pt-1 pb-1 ps-2 pe-2 d-flex align-items-center justify-content-center"
+                    style="font-size: 1.4em;"
+                    title="Supprimer toutes les photos"
+                    aria-label="Supprimer toutes les photos"
+                    id="deleteAllPhotosBtn"
+                    data-photos="{{ photos }}">
+                        <i class="bi bi-trash3-fill"></i> <span class="ms-2 me-4 d-none d-md-block" style="font-size: 0.6em">Tous</span>
+            </button>
+        </div>
+
+    </div>
+
+    <div class="row rounded-bottom-4 bg-dark shadow" style="height: 20px;">
+
+    </div>
+
+    <!-- Barre de progression : -->
+    <div class="container mt-2 pt-1 pb-2 text-start bg-light rounded-2 shadow">
+        <div class="row ms-1" style="font-size: 1.0em;">
+            <p><b>Statut de l'opération :</b> <span id="progress-message"></span><span id="qr-code-progress-message" class="mt-2 text-warning fw-bold"></span></p>
+        </div>
+
+        <div class="progress" style="height: 40px;">
+            <div id="progress-bar" class="progress-bar bg-warning progress-bar-striped progress-bar-animated"
+                 role="progressbar" style="width: 0%;">0%</div>
+        </div>
+    </div>
+
+
+</div>
+
+<!-- Suppression des toutes les associations photo & élèves : -->
+{% with btnId = 'removeAllStudentsBtn',
+        headTitle = 'Confirmation',
+        descriptionMessage = "Voulez-vous vraiment supprimer tous les liens entre les élèves et les photos ?",
+        successMessage = "Suppression effectuée avec succès !",
+        errorMessage = "Une erreur est survenue lors de la suppression.",
+        fetchUrl = url('ad_agt:remove_all_students')
+        %}
+    {% include 'core/fragments/modals/modal_confirmation.html' %}
+{% endwith %}
+
+<!-- Suppression de toutes les photos : -->
+{% with btnId = 'deleteAllPhotosBtn',
+        headTitle = 'Confirmation suppression photos',
+        descriptionMessage = "Voulez-vous vraiment supprimer toutes les photos ? Cela supprimera également les fichiers uploadés.",
+        successMessage = "Suppression effectuée avec succès !",
+        errorMessage = "Une erreur est survenue lors de la suppression.",
+        fetchUrl = url('ad_agt:delete_all_photos')
+        %}
+    {% include 'core/fragments/modals/modal_confirmation.html' %}
+{% endwith %}
+
+
+<!-- Script pour l'appel du rognage de toutes les photos via WebSocket : -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const socket = new WebSocket("ws://" + window.location.host + "/ws/crop_progress/");
+
+    document.getElementById("crop-button").addEventListener("click", function() {
+
+        // Désactiver le bouton pour éviter plusieurs clics
+        document.getElementById("crop-button").disabled = true;
+        this.innerHTML = '<i class="bi bi-hourglass-split"></i> <span class="ms-2 me-4 d-none d-md-block" style="font-size: 0.6em;">Traitement...</span>';
+
+        // Lancer le traitement côté WebSocket
+        socket.send("start");
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            document.getElementById("progress-bar").style.width = data.progress + "%";
+            document.getElementById("progress-bar").textContent = data.progress + "%";
+            document.getElementById("progress-message").textContent = data.message;
+
+            if (data.progress === 100) {
+                document.getElementById("progress-message").textContent = "🎉 Recadrage terminé avec succès !";
+                document.getElementById("progress-bar").classList.remove("progress-bar-animated");
+
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);  // Recharge la page après 2 secondes
+            }
+        };
+    });
+});
+</script>
+
+
+<!-- Script de lecture de tous les QR Codes des photos pour assigner les photos à leurs élèves : -->
+
+    <!-- Ajout du token CSRF : -->
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+<script>
+    // Récupérer le token CSRF :
+    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const socket = new WebSocket("ws://" + window.location.host + "/ws/read_qr_progress/");
+
+    let channelName = null;  // Stocker le vrai nom du canal WebSocket
+    const progressMessage = document.getElementById("progress-message");
+    const qrCodeProgressMessage = document.getElementById("qr-code-progress-message");
+
+    socket.onopen = function () {
+        console.log("✅ WebSocket connecté !");
+    };
+
+    socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        // Récupérer le vrai channel_name dès la connexion WebSocket
+        if (data.channel_name) {
+            console.log("✅ Channel Name WebSocket reçu :", data.channel_name);
+            channelName = data.channel_name;  // Stocker pour l'envoyer dans la requête AJAX
+            return;
+        }
+
+        // Mise à jour de la barre de progression
+        document.getElementById("progress-bar").style.width = data.progress + "%";
+        document.getElementById("progress-bar").textContent = data.progress + "%";
+        progressMessage.textContent = data.message;
+
+        if (data.progress === 100) {
+            progressMessage.textContent = "🎉 Lecture terminée avec succès ! ";
+            document.getElementById("progress-bar").classList.remove("progress-bar-animated");
+
+            // Affichage du message final
+            qrCodeProgressMessage.textContent = "✔️ Tous les QR Codes ont été traités avec succès !";
+
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+    };
+
+    document.getElementById("read-all-qr-codes-button").addEventListener("click", function() {
+        this.disabled = true;
+        this.innerHTML = '<i class="bi bi-hourglass-split"></i> <span class="ms-2 me-4 d-none d-md-block" style="font-size: 0.6em;">Traitement...</span>';
+
+        // Réinitialiser le message avant de commencer le traitement
+        qrCodeProgressMessage.textContent = "";
+
+        // Vérifier si le WebSocket a bien reçu le channel_name
+        if (!channelName) {
+            qrCodeProgressMessage.textContent = "⏳ WebSocket non encore prêt ! Réessayez.";
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-qr-code-scan"></i> <span class="ms-2 me-4 d-none d-md-block" style="font-size: 0.6em;">Lire</span>';
+            return;
+        }
+
+        console.log("🚀 Envoi de la requête avec channel_name :", channelName);
+
+        fetch("{{ url('ad_agt:read_all_qr_codes') }}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ channel_name: channelName })  // Envoyer le vrai nom du canal
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Afficher un message de fin de traitement dans la page
+            qrCodeProgressMessage.textContent = data.message;
+        })
+        .catch(error => {
+            console.error("Erreur :", error);
+            qrCodeProgressMessage.textContent = "❌ Une erreur est survenue lors du traitement !";
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-qr-code-scan"></i> <span class="ms-2 me-4 d-none d-md-block" style="font-size: 0.6em;">Lire</span>';
+        });
+    });
+});
+</script>

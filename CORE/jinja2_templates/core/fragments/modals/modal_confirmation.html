@@ -1,0 +1,80 @@
+<!--
+_______________________________________________________________________________
+
+                                FRAGMENT : modal_confirmation
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient le modal permettant d'afficher une boite de confirmation d'action et
+d'appliquer l'appel AJAX pour mener l'action et afficher les messages de traitement dans
+le modal de dialogue.
+-->
+
+<!-- Modal de confirmation d'action : -->
+<div class="modal fade" id="idModalBox-{{ btnId }}" tabindex="-1" aria-labelledby="confirmRemoveStudentsLabel-{{ btnId }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-warning">
+                <h5 class="modal-title" id="confirmRemoveStudentsLabel-{{ btnId }}">{{ headTitle }}</h5>
+                <button type="button" class="btn-close bg-danger" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body p-2">
+                <p>{{ descriptionMessage }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" id="idBtnBoxConfirm-{{ btnId }}">Confirmer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Script d'action AJAX : -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const removeAllBtn_{{ btnId }} = document.getElementById("{{btnId}}");
+    const confirmBtn_{{ btnId }} = document.getElementById("idBtnBoxConfirm-{{ btnId }}");
+    const modalBody_{{ btnId }} = document.querySelector("#idModalBox-{{ btnId }} .modal-body");
+
+    // Ouvrir le modal lorsque l'utilisateur clique sur le bouton
+    removeAllBtn_{{ btnId }}.addEventListener("click", function() {
+        let confirmModal = new bootstrap.Modal(document.getElementById("idModalBox-{{ btnId }}"));
+        confirmModal.show();
+    });
+
+    // Gérer la confirmation
+    confirmBtn_{{ btnId }}.addEventListener("click", function() {
+        fetch("{{ fetchUrl }}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/json"
+            }
+        })
+         .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                modalBody_{{ btnId }}.innerHTML = `<div class="text-center">
+                    <i class="bi bi-check-circle"></i> {{ successMessage }}
+                </div>`;
+                setTimeout(() => {
+                    location.reload(); // Recharge la page après succès
+                }, 1500);
+            } else {
+                modalBody_{{ btnId }}.innerHTML = `<div class="alert alert-danger text-center">
+                    <i class="bi bi-x-circle"></i> ${data.message}
+                </div>`;
+            }
+        })
+        .catch(error => {
+            console.error("Erreur :", error);
+            modalBody_{{ btnId }}.innerHTML = `<div class="alert alert-danger text-center">
+                <i class="bi bi-x-circle"></i> {{ errorMessage }}
+            </div>`;
+        });
+    });
+});
+</script>
+

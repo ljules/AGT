@@ -71,6 +71,12 @@ Ce fragment contient le modal permettant d'afficher la photo et de mieux défini
   </div>
 </div>
 
+<!-- Ajout du token CSRF : -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+<script>
+    // Récupérer le token CSRF :
+    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+</script>
 
 
 <!-- Script JS de Cropper.js -->
@@ -125,14 +131,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRFToken": '<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">',
+                    "X-CSRFToken": csrfToken,
                 },
                 body: JSON.stringify({
                     photo_id: {{ photo.id }},
-                    crop_x: cropData.x,
-                    crop_y: cropData.y,
-                    crop_width: cropData.width,
-                    crop_height: cropData.height
+                    crop_x: parseInt(cropData.x),
+                    crop_y: parseInt(cropData.y),
+                    crop_width: parseInt(cropData.width),
+                    crop_height: parseInt(cropData.height)
                 }),
             })
             .then(response => response.json())

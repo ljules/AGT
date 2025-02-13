@@ -62,13 +62,21 @@ Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de
         <!-- Formulaire d'upload :-->
         <form method="POST" enctype="multipart/form-data" class="g-5 mt-3">
             <!-- Récupération du token csrf : -->
-            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+{#            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
             {#{% csrf_token %}#}
 
             <input type="file" name="images" id="images" multiple>
 
         </form>
     </div>
+
+
+    <!-- Ajout du token CSRF : -->
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    <script>
+        // Récupérer le token CSRF :
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    </script>
 
 
     <!-- Importation FilePond (partie JS) : -->
@@ -97,7 +105,7 @@ Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de
                     method: 'POST',
                     revert: null, // Désactive la suppression de fichier, sinon renseigner l'url ex : "/delete-photo/"
                     headers: {
-                        'X-CSRFToken': '<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">',
+                        'X-CSRFToken': csrfToken,
                     },
                 },
             },

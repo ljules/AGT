@@ -1,0 +1,65 @@
+<!--
+_______________________________________________________________________________
+
+                            FRAGMENT : form_download_photos
+_______________________________________________________________________________
+
+Description :
+-------------
+Ce fragment contient le formulaire qui permet de récupérer les photos traitées.
+-->
+
+{% extends 'core/fragments/wrappers/wrapper_standard.html' %}
+
+{% block name_icon %}bi-download{% endblock %}
+{% block title %}Téléchargement des photos traitées{% endblock %}
+
+
+<!-- Insertion du formulaire : -->
+{% block wrapper_content %}
+    <!-- Instructions pour l'utilisateur : -->
+    <form method="POST" enctype="multipart/form-data" action="{{ url('ad_agt:download_processed_photos') }}">
+        <!-- Récupération du token csrf : -->
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+        <!-- Choix du format du nom de fichier : -->
+        <div class="container mt-3 mb-4">
+            <div class="row col ms-2">
+                <p><u class="fw-bold">Etape 1 :</u> Veuillez choisir un format pour nommer de vos fichiers.</p>
+            </div>
+
+            <div class="row ms-5 mb-4">
+
+                <!-- Choix de l'ordre Nom & Prénom : -->
+                <div class="col-4">
+                    <select class="form-control" id="order-name-surname" name="order">
+                        <option value="" disabled selected>Choisir l'ordre</option>
+                        <option value="last_first">Nom Prénom</option>
+                        <option value="first_last"> Prénom Nom</option>
+                    </select>
+                </div>
+
+                <!-- Choix du séparateur : -->
+                <div class="col-4">
+                    <select class="form-control" id="separator" name="separator">
+                        <option value="" disabled selected>Séparateur ?</option>
+                        <option value=" ">Espace : " "</option>
+                        <option value="-">Tiret haut : "-"</option>
+                        <option value="_">Tiret bas : "_"</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Bouton de validation : -->
+            <div class="row ms-2">
+                <p><u class="fw-bold">Etape 2 :</u> Cliquer pour générer l'archive et la télécharger.</p>
+            </div>
+
+            <div class="row col-3 m-auto">
+                <button type="submit" class="btn btn-info">Télécharger</button>
+            </div>
+
+        </div>
+    </form>
+
+{% endblock %}

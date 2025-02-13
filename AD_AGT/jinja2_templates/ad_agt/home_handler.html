@@ -27,7 +27,10 @@ Cette page du template définira la page d'accueil du gestionnaire de photos.
     <div class="container" style="height: 130px"></div>
 
     <div class="container mt-4">
-        <h1 class="text-center mb-4">Galerie de Photos</h1>
+        <!-- Barre d'outils : -->
+         <div class="mb-3">
+            {% include 'ad_agt/fragments/ad_agt_toolbar.html' %}
+        </div>
 
         <!-- Grille Bootstrap -->
         <div class="row">

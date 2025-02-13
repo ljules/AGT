@@ -22,5 +22,9 @@ Cette page du template définira la page de récupération des fichiers photos a
 
 
 {% block content %}
-    <h1>A FAIRE</h1>
+    <!-- Marge supérieure -->
+    <div class="container" style="height: 130px"></div>
+
+    <!-- Inclusion du contenu : -->
+    {% include 'core/fragments/forms/form_download_photos.html' %}
 {% endblock %}

@@ -1,4 +1,6 @@
 import os
+
+from PIL import Image
 from django.db import models
 from django.utils import timezone
 
@@ -60,6 +62,41 @@ class Photo(models.Model):
     crop_width = models.FloatField(default=0)
     crop_height = models.FloatField(default=0)
     crop_lock = models.BooleanField(default=False)
+
+    # Redéfinition de la méthode save() :
+    def save(self, *args, **kwargs):
+        """
+        Sauvegarde l'objet Photo en définissant un rognage couvrant 80% de l'image,
+        centré sur l'image.
+        """
+        super().save(*args, **kwargs)  # Sauvegarde initiale pour s'assurer que le fichier existe
+
+        if self.image and (
+                self.crop_width == 0 or self.crop_height == 0):  # Si l'image est présente et que le rognage n'est pas défini
+            image_path = self.image.path
+            try:
+                with Image.open(image_path) as img:
+                    full_width, full_height = img.width, img.height
+
+                    # Définition des dimensions du rognage (80% de l'image)
+                    crop_width = int(full_width * 0.8)
+                    crop_height = int(full_height * 0.8)
+
+                    # Calcul pour centrer la zone de rognage
+                    crop_x = (full_width - crop_width) // 2
+                    crop_y = (full_height - crop_height) // 2
+
+                    # Mise à jour des valeurs dans l'objet
+                    self.crop_x = crop_x
+                    self.crop_y = crop_y
+                    self.crop_width = crop_width
+                    self.crop_height = crop_height
+                    super().save(update_fields=['crop_x', 'crop_y', 'crop_width', 'crop_height'])
+
+            except Exception as e:
+                print(f"Erreur lors de la récupération des dimensions de l'image : {e}")
+
+
 
     def __str__(self):
         return self.image.name

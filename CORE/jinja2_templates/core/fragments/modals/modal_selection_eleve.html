@@ -61,6 +61,14 @@ Ce fragment contient le modal permettant d'afficher la photo et de choisir un é
 </div>
 
 
+<!-- Ajout du token CSRF : -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+<script>
+    // Récupérer le token CSRF :
+    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+</script>
+
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     // Sélectionner le bouton de sauvegarde
@@ -83,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-CSRFToken": '<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">',  // Ajouter le jeton CSRF pour la sécurité
+                "X-CSRFToken": csrfToken,  // Ajouter le jeton CSRF pour la sécurité
             },
             body: JSON.stringify({
                 photo_id: photoId,

@@ -28,12 +28,14 @@ SECRET_KEY = 'django-insecure-0@ea3lnf52^(dhv4h)r*12ub3&-cxzy0ddln^a@w^z3_-cw*qd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',  # Serveur WebSocket
+    'channels',  # WebSockets via Django Channels
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -106,6 +108,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'AGT.wsgi.application'
+
+# Ajout de channel pour le WebSocket :
+ASGI_APPLICATION = "AGT.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",  # Utilisation en mémoire
+    },
+}
+
 
 
 # Database
