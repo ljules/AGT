@@ -57,6 +57,7 @@ class Photo(models.Model):
         null=True,
         blank=True
     )
+    cropped = models.BooleanField(default=False)
     crop_x = models.FloatField(default=0)
     crop_y = models.FloatField(default=0)
     crop_width = models.FloatField(default=0)

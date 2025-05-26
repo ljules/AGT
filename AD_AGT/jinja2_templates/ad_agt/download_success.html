@@ -1,0 +1,34 @@
+<!--
+_______________________________________________________________________________
+
+                 PAGE DE CONFIRMATION DE TELECHARGEMENT DES PHOTOS
+_______________________________________________________________________________
+
+Description :
+-------------
+Cette page du template définie la page affichée après que l'archive ZIP des images est téléchargée.
+-->
+
+{% extends 'core/base.html' %}
+
+{% block title %} {{ SITE_NAME }}: Fin téléchargement {% endblock %}
+
+{% block content %}
+<!-- Wrapper pour centrer le contenu -->
+<div class="d-flex justify-content-center align-items-center vh-100">
+
+    <!-- Inclusion d'un wrapper & de son contenu : -->
+    {% with
+        name_icon = "bi-download",
+        title = "Fin du téléchargement",
+        content = """
+                    <div class='container m-4'>
+                        <h5>✅ Téléchargement terminé avec succès !</h5>
+                        <p class='ms-5'>Vous retrouverez toutes vos photos traitées dans l'archive téléchargée sur votre PC.</p>
+                    </div>
+                """ %}
+        {% include 'core/fragments/wrappers/wrapper_standard.html' %}
+    {% endwith %}
+
+</div>
+{% endblock %}

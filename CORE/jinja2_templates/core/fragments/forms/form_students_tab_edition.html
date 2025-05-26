@@ -85,6 +85,7 @@ Ce fragment contient le tableau d'édition des élèves inscrits dans la BD.
                     <form method="POST" action="{{ url('ad_a2p:students_editor') }}">
                         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                         {#{% csrf_token %}#}
+
                         <!-- Clé primaire : -->
                         <td class="col-1 align-middle text-center">
                             {{ student.id }}

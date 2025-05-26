@@ -8,6 +8,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.contrib import messages
 from django.core.files.storage import default_storage
+from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -22,19 +23,47 @@ from CORE.utils.correct_orientation import correct_orientation
 
 # HOME HANDLER :
 def home_handler(request):
-    # Récupérer toutes les instances de Photo
-    photos = Photo.objects.all()
+
+    # Récupérer & appliquer le statut du verrouillage :
+    flip_lock = request.GET.get('flip-lock', None)
+    photo_id = request.GET.get('photo-id', None)
+    print(f"flip_lock est : {flip_lock} sur la photo id : {photo_id}")
+    if flip_lock == 'flip':
+        photo = Photo.objects.get(id=photo_id)
+        photo.crop_lock = not photo.crop_lock
+        photo.save()
+
+
+    # Récupérer & appliquer les options de filtrage :
+    filter_type = request.GET.get('filter', None)
+    print(f"Statut du filtre :{filter_type}")
+    # Récupérer uniquement les photos non assignées à un étudiant :
+    if filter_type == 'unassigned':
+        photos = Photo.objects.filter(fk_id_student__isnull=True)
+
+    # Récupérer uniquement les photos non cadrées :
+    elif filter_type == 'no-cropped':
+        photos = Photo.objects.filter(cropped=False)
+    # Récupérer toutes les instances de Photo :
+    else:
+        photos = Photo.objects.all()
+
+    # Pagination des photos :
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(photos, 8)  # Nombre d'éléments par page
+    page_obj = paginator.get_page(page_number)
 
     # Récupérer tous les étudiants qui ne sont pas associés à une photo (où fk_id_student est NULL)
     students_without_photo = Student.objects.filter(photo__isnull=True)
 
     # Transmettre les photos et les étudiants sans photos au template
     context = {
-        'photos': photos,
+        'photos': page_obj,
         'students_without_photo': students_without_photo,
     }
 
     return render(request, 'ad_agt/home_handler.html', context)
+
 
 # UPLOAD DES PHOTOS SANS FILEPOND :
 # def upload_photos(request):
@@ -52,6 +81,7 @@ def home_handler(request):
 #     else:
 #         form = PhotoForm()
 #     return render(request, 'ad_agt/upload_photos.html', {'form': form})
+
 
 # UPLOAD DES PHOTOS AVEC FILEPOND :
 # @csrf_exempt
@@ -97,6 +127,8 @@ def save_crop_coordinates(request):
             photo.crop_y = crop_y
             photo.crop_width = crop_width
             photo.crop_height = crop_height
+            photo.cropped = True
+            photo.crop_lock = True
             photo.save()
 
             return JsonResponse({"success": True, "message": "Coordonnées sauvegardées."})
@@ -107,11 +139,35 @@ def save_crop_coordinates(request):
 
 
 # ROGNER TOUTES LES PHOTOS AVEC LA FONCTION UTILITAIRE CROP_ON_FACE() :
-def crop_photos_page(request):
+def crop_all_photos(request):
     """
-    Affiche la page avec la barre de progression.
+    Vue pour recadrer toutes les photos et envoyer la progression en temps réel via WebSockets.
     """
-    return render(request, 'crop_photos.html')
+    photos = Photo.objects.all()
+    total = len(photos)
+
+    if total == 0:
+        return JsonResponse({"success": False, "message": "Aucune photo à recadrer."}, status=400)
+
+    channel_layer = get_channel_layer()
+    for index, photo in enumerate(photos, start=1):
+        if not photo.crop_lock:
+            photo.cropped = crop_on_face(photo) or photo.cropped  # appel de la fonction de rognage et mis à jour de cropped
+            photo.save(update_fields=['cropped'])
+        progress = int((index / total) * 100)
+
+        # Envoi de la progression au WebSocket via le groupe :
+        async_to_sync(channel_layer.group_send)(
+            "progress_updates",
+            {
+                "type": "send_progress",
+                "task": "crop", # Identifiant de la tâche
+                "progress": progress,
+                "message": f"Recadrage {index}/{total}..."
+            }
+        )
+
+    return JsonResponse({"success": True, "message": "Recadrage terminé."})
 
 
 # ASSOCIER TOUTES LES PHOTOS A UNE ELEVE AVEC LA FONCTION UTILITAIRE READ_QR_CODE() :
@@ -151,10 +207,12 @@ def read_all_qr_codes(request):
 
                 progress = int((index / total_photos) * 100)
 
-                async_to_sync(channel_layer.send)(
+                # Envoi de la progression au WebSocket via le groupe :
+                async_to_sync(channel_layer.group_send)(
                     channel_name,
                     {
                         "type": "send.progress",
+                        "task": "qr_code", # Identifiant de la tâche
                         "progress": progress,
                         "message": f"Traitement {index}/{total_photos}..."
                     }
@@ -170,19 +228,19 @@ def read_all_qr_codes(request):
 
 
 # AJOUT D'UNE ASSOCIATION ELEVE-PHOTO :
-# @csrf_exempt
+#@csrf_exempt
 def update_student_association(request):
     if request.method == 'POST':
         try:
             # Récupérer les données de la requête AJAX
             data = json.loads(request.body)
             photo_id = data.get('photo_id')
-            last_name = data.get('last_name')
-            first_name = data.get('first_name')
-
+            student_id = data.get('student_id')
+            student_name = data.get('student_name')
+            print(f"photo_id: {photo_id} pour associer à : {student_name}")
             # Récupérer la photo et l'élève correspondant
             photo = get_object_or_404(Photo, id=photo_id)
-            student = Student.objects.get(last_name=last_name, first_name=first_name)
+            student = Student.objects.get(id=student_id)
 
             # Mettre à jour la photo avec l'élève associé
             photo.fk_id_student = student
@@ -255,7 +313,7 @@ def remove_all_students_from_photos(request):
 
 
 # SUPPRESSION DE TOUTES LES PHOTOS (objets + fichiers)
-@csrf_exempt
+# @csrf_exempt
 def delete_all_photos(request):
     if request.method == 'POST':
         try:
@@ -277,52 +335,50 @@ def delete_all_photos(request):
     return JsonResponse({"success": False, "message": "Requête invalide."}, status=400)
 
 
-
 # DOWNLOAD DES PHOTOS :
 def download_photos(request):
     return render(request, 'ad_agt/download_photos.html')
 
 
 def download_processed_photos(request):
+    """
+    Vue qui génère une archive ZIP des photos recadrées et informe WebSocket de la progression.
+    """
     if request.method == "POST":
         order = request.POST.get("order")
         separator = request.POST.get("separator")
 
         if not order or not separator:
-            return HttpResponse("Format de nom de fichier non sélectionné.", status=400)
+            print(f"L'ordre entre Nom & Prénom n'a pas été choisi !" if not order else f"L'ordre entre Nom & Prénom est choisi.")
+            print(f"Le séparateur n'a pas été choisi !" if not separator else f"Le séparateur est choisi.")
+            return JsonResponse({"error": "Format de nom de fichier non sélectionné."}, status=400)
 
-        # Vérification de l'existence du dossier media/photos
-        photos_dir = os.path.join(settings.MEDIA_ROOT, 'photos')
-        if not os.path.exists(photos_dir):
-            return HttpResponse("Le dossier de stockage des photos est introuvable.", status=500)
+        photos = Photo.objects.filter(fk_id_student__isnull=False)
+        total_photos = len(photos)
+        print(f"Nombre de photos : {total_photos}")
+        if total_photos == 0:
+            return JsonResponse({"error": "Aucune photo à traiter."}, status=400)
 
-        # Création d'une archive ZIP
         zip_buffer = BytesIO()
+        channel_layer = get_channel_layer()
+
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            for photo in Photo.objects.filter(fk_id_student__isnull=False):
+            for index, photo in enumerate(photos, start=1):
                 student = photo.fk_id_student
                 if not student:
                     continue
 
-                # Formatage du nom de fichier
-                if order == "last_first":
-                    file_name = f"{student.last_name}{separator}{student.first_name}.jpg"
-                else:
-                    file_name = f"{student.first_name}{separator}{student.last_name}.jpg"
-
-                # Obtenir le chemin complet de l'image
+                # Formatage du nom du fichier selon l'ordre choisi
+                file_name = f"{student.last_name}{separator}{student.first_name}.jpg" if order == "last_first" else f"{student.first_name}{separator}{student.last_name}.jpg"
                 image_path = os.path.join(settings.MEDIA_ROOT, photo.image.name)
 
-                # Vérifier si le fichier existe avant d'essayer de l'ouvrir
                 if not os.path.exists(image_path):
-                    print(f"Fichier non trouvé : {image_path}")
                     continue
 
-                # Ouvrir l'image et appliquer le recadrage
                 with Image.open(image_path) as img:
-                    img = correct_orientation(img)  # Redresse l'image si nécessaire
+                    img = correct_orientation(img)  # Corrige l'orientation si nécessaire
 
-                    # Appliquer le rognage :
+                    # Application du rognage
                     crop_box = (photo.crop_x, photo.crop_y,
                                 photo.crop_x + photo.crop_width,
                                 photo.crop_y + photo.crop_height)
@@ -336,10 +392,44 @@ def download_processed_photos(request):
                     # Ajout au fichier ZIP
                     zip_file.writestr(file_name, img_io.getvalue())
 
-        # Préparer la réponse avec le fichier ZIP
+                # Envoi de la progression au WebSocket
+                progress = int((index / total_photos) * 100)
+                async_to_sync(channel_layer.group_send)(
+                    "progress_updates",
+                    {
+                        "type": "send_progress",
+                        "task": "download",  # Identifiant de la tâche
+                        "progress": progress,
+                        "message": f"Téléchargement {index}/{total_photos}..."
+                    }
+                )
+
+        # Finalisation du ZIP et retour de la réponse
         zip_buffer.seek(0)
         response = HttpResponse(zip_buffer, content_type='application/zip')
         response['Content-Disposition'] = 'attachment; filename="photos_recadrees.zip"'
+
+        # Envoi du message de fin via WebSocket
+        async_to_sync(channel_layer.group_send)(
+            "progress_updates",
+            {
+                "type": "send_progress",
+                "task": "download",
+                "progress": 100,
+                "message": "🎉 Téléchargement terminé !"
+            }
+        )
+
         return response
 
-    return render(request, 'ad_agt/download_photos.html')
+    # elif request.method == "GET":
+    #     # Afficher une page de confirmation après téléchargement
+    #     return render(request, 'ad_agt/download_success.html')
+
+    return JsonResponse({"error": "Méthode non autorisée."}, status=405)
+
+def download_success(request):
+    """
+    Vue pour afficher un message de succès après le téléchargement.
+    """
+    return render(request, 'ad_agt/download_success.html')

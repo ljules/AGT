@@ -34,7 +34,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',  # Serveur WebSocket
+    'daphne',    # Serveur WebSocket
     'channels',  # WebSockets via Django Channels
     'django.contrib.admin',
     'django.contrib.auth',
@@ -115,6 +115,10 @@ ASGI_APPLICATION = "AGT.asgi.application"
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",  # Utilisation en mémoire
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',  # Pour la production
+        # 'CONFIG': {
+        #     "hosts": [('127.0.0.1', 6379)],
+        # },
     },
 }
 

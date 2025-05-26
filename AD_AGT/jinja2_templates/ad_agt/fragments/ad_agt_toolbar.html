@@ -12,20 +12,22 @@ Fragment pour la barre d'outils du module de traitement des photos
 
 
 <div class="container">
-    <div class="row col-4 rounded-top-4 bg-dark text-warning pt-2">
-        <h5>Outils</h5>
+    <div class="row col-4 rounded-top-4 bg-dark text-warning pt-1 pb-0">
+        <h5>Action & Filtres</h5>
     </div>
+
+    <!-- Barre des outils : -->
     <div class="row border-top border-dark border-4 bg-secondary shadow" style="min-height: 50px;">
 
         <!-- Recadrage automatique de toutes les photos : -->
         <div class="col-2 m-1">
             <button type="button"
-                    class="btn btn-info pt-1 pb-1 ps-2 pe-2 d-flex align-items-center justify-content-center"
-                    style="font-size: 1.4em;"
+                    class="btn btn-info pt-0 pb-0 ps-2 pe-2 d-flex align-items-center justify-content-center w-100"
+                    style="font-size: 1.4em; border-color: #676666;"
                     title="Recadrer toutes les photos automatiquement"
                     aria-label="Recadrer toutes les photos automatiquement"
                     id="crop-button">
-                <i class="bi bi-person-bounding-box"></i><span class="ms-2 d-none d-md-block" style="font-size: 0.6em">Recadrage</span>
+                <i class="bi bi-person-bounding-box"></i><span class="ms-2 d-none d-md-block" style="font-size: 0.6em">Rogner</span>
             </button>
         </div>
 
@@ -33,8 +35,8 @@ Fragment pour la barre d'outils du module de traitement des photos
         <!-- Lecture des QR Codes : -->
         <div class="col-2 m-1">
             <button type="button"
-                    class="btn btn-info pt-1 pb-1 ps-2 pe-2 d-flex align-items-center justify-content-center"
-                    style="font-size: 1.4em;"
+                    class="btn btn-info pt-0 pb-0 ps-2 pe-2 d-flex align-items-center justify-content-center w-100"
+                    style="font-size: 1.4em; border-color: #676666;"
                     title="Lire tous les QR Codes des photos"
                     aria-label="Lire tous les QR Codes des photos"
                     id="read-all-qr-codes-button">
@@ -45,8 +47,8 @@ Fragment pour la barre d'outils du module de traitement des photos
         <!-- Bouton de suppression des liens photos/étudiants : -->
         <div class="col-2 m-1">
             <button type="button"
-                    class="btn btn-warning pt-1 pb-1 ps-2 pe-2 d-flex align-items-center justify-content-center"
-                    style="font-size: 1.4em;"
+                    class="btn btn-warning pt-0 pb-0 ps-2 pe-2 d-flex align-items-center justify-content-center w-100"
+                    style="font-size: 1.4em; border-color: #676666;"
                     title="Supprimer tous les liens des élèves avec les photos"
                     aria-label="Supprimer tous les liens des élèves avec les photos"
                     id="removeAllStudentsBtn"
@@ -58,8 +60,8 @@ Fragment pour la barre d'outils du module de traitement des photos
         <!-- Bouton de suppression de toutes les photos & fichiers : -->
         <div class="col-2 m-1">
             <button type="button"
-                    class="btn btn-danger pt-1 pb-1 ps-2 pe-2 d-flex align-items-center justify-content-center"
-                    style="font-size: 1.4em;"
+                    class="btn btn-danger pt-0 pb-0 ps-2 pe-2 d-flex align-items-center justify-content-center w-100"
+                    style="font-size: 1.4em; border-color: #676666;"
                     title="Supprimer toutes les photos"
                     aria-label="Supprimer toutes les photos"
                     id="deleteAllPhotosBtn"
@@ -70,8 +72,111 @@ Fragment pour la barre d'outils du module de traitement des photos
 
     </div>
 
-    <div class="row rounded-bottom-4 bg-dark shadow" style="height: 20px;">
 
+    <!-- Barre des filtres : -->
+    <div class="row bg-secondary shadow" style="min-height: 20px;">
+
+        <!-- Bouton tout afficher : -->
+        <div class="col-2 m-1">
+            <button type="button"
+                    class="btn btn-sm btn-outline-light pt-0 pb-0 ps-2 pe-2 d-flex align-items-center justify-content-center w-100"
+                    style="font-size: 1.2em;"
+                    title="Afficher uniquement les photos non associées"
+                    aria-label="Afficher uniquement les photos non associées"
+                    onclick="window.location.href='{{ url('ad_agt:home_handler') }}'">
+                        <i class="bi bi-eye-fill"></i>
+                        <span class="ms-2 d-none d-md-block" style="font-size: 0.6em">Tout voir</span>
+            </button>
+        </div>
+
+        <!-- Bouton filtrer les photos non associées : -->
+        <div class="col-2 m-1">
+            <button type="button"
+                    class="btn btn-sm btn-outline-light pt-0 pb-0 ps-2 pe-2 d-flex align-items-center justify-content-center w-100"
+                    style="font-size: 1.2em;"
+                    title="Afficher uniquement les photos non associées"
+                    aria-label="Afficher uniquement les photos non associées"
+                    onclick="window.location.href='{{ url('ad_agt:home_handler') }}?filter=unassigned'">
+                        <i class="bi bi-person-fill-exclamation"></i>
+                        <span class="ms-2 d-none d-md-block" style="font-size: 0.6em">Non associées</span>
+            </button>
+        </div>
+
+        <!-- Bouton filter les photos non recadrées : -->
+        <div class="col-2 m-1">
+            <button type="button"
+                    class="btn btn-sm btn-outline-light pt-0 pb-0 ps-2 pe-2 d-flex align-items-center justify-content-center w-100"
+                    style="font-size: 1.2em;"
+                    title="Afficher uniquement les photos non associées"
+                    aria-label="Afficher uniquement les photos non associées"
+                    onclick="window.location.href='{{ url('ad_agt:home_handler') }}?filter=no-cropped'">
+                        <i class="bi bi-person-video3"></i>
+                        <span class="ms-2 d-none d-md-block" style="font-size: 0.6em">Non cadrées</span>
+            </button>
+        </div>
+
+    </div>
+
+
+    <!-- Barre du paginator : -->
+    <div class="row p-2 rounded-bottom-4 bg-dark shadow" style="min-height: 20px">
+        <nav class="m-0 " aria-label="Pagination">
+            <ul class="pagination justify-content-center m-0">
+
+                <!-- Navigation vers gauche : -->
+                {% if photos.has_previous() %}
+                    <!-- Retour 1ère page -->
+                    <li class="page-item">
+                        <a class="page-link text-dark bg-warning border-warning"
+                           href="?page=1"
+                           title="Atteindre la première page"
+                           aria-label="Première page">
+                                <i class="bi bi-chevron-double-left" style="font-size: 0.8em;"></i>
+                        </a>
+                    </li>
+                    <!-- Recul d'une page : -->
+                    <li class="page-item">
+                        <a class="page-link text-dark bg-warning border-warning"
+                           href="?page={{ photos.previous_page_number() }}" aria-label="Page précédente"
+                           title="Reculer d'une page">
+                                <i class="bi bi-chevron-left" style="font-size: 0.8em;"></i>
+                        </a>
+                    </li>
+                {% endif %}
+
+                <!-- Pages numérotées -->
+                {% for num in photos.paginator.page_range %}
+                    <li class="page-item {% if photos.number == num %}active{% endif %}">
+                        <a class="page-link {% if photos.number == num %}bg-warning text-dark fw-bold{% else %} bg-dark text-light{% endif %} text-warning border-warning"
+                           href="?page={{ num }}"
+                           title="Atteindre la page {{ num }}">
+                            {{ num }}
+
+                        </a>
+                    </li>
+                {% endfor %}
+
+                {% if photos.has_next() %}
+                    <!-- Avancer d'une page : -->
+                    <li class="page-item">
+                        <a class="page-link text-dark bg-warning border-warning"
+                           href="?page={{ photos.next_page_number() }}" aria-label="Page suivante"
+                           title="Avancer d'une page">
+                                <i class="bi bi-chevron-right" style="font-size: 0.8em;"></i>
+                        </a>
+                    </li>
+                    <!-- Atteindre dernière page : -->
+                    <li class="page-item">
+                        <a class="page-link text-dark bg-warning border-warning"
+                           href="?page={{ photos.paginator.num_pages }}"
+                           title="Atteindre la dernière page"
+                           aria-label="Dernière page">
+                                <i class="bi bi-chevron-double-right" style="font-size: 0.8em;"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
 
     <!-- Barre de progression : -->
@@ -112,44 +217,9 @@ Fragment pour la barre d'outils du module de traitement des photos
 {% endwith %}
 
 
-<!-- Script pour l'appel du rognage de toutes les photos via WebSocket : -->
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const socket = new WebSocket("ws://" + window.location.host + "/ws/crop_progress/");
 
-    document.getElementById("crop-button").addEventListener("click", function() {
-
-        // Désactiver le bouton pour éviter plusieurs clics
-        document.getElementById("crop-button").disabled = true;
-        this.innerHTML = '<i class="bi bi-hourglass-split"></i> <span class="ms-2 me-4 d-none d-md-block" style="font-size: 0.6em;">Traitement...</span>';
-
-        // Lancer le traitement côté WebSocket
-        socket.send("start");
-
-        socket.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            document.getElementById("progress-bar").style.width = data.progress + "%";
-            document.getElementById("progress-bar").textContent = data.progress + "%";
-            document.getElementById("progress-message").textContent = data.message;
-
-            if (data.progress === 100) {
-                document.getElementById("progress-message").textContent = "🎉 Recadrage terminé avec succès !";
-                document.getElementById("progress-bar").classList.remove("progress-bar-animated");
-
-                setTimeout(() => {
-                    location.reload();
-                }, 2000);  // Recharge la page après 2 secondes
-            }
-        };
-    });
-});
-</script>
-
-
-<!-- Script de lecture de tous les QR Codes des photos pour assigner les photos à leurs élèves : -->
-
-    <!-- Ajout du token CSRF : -->
-    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+<!-- Ajout du token CSRF : -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
 <script>
     // Récupérer le token CSRF :
@@ -158,37 +228,32 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const socket = new WebSocket("ws://" + window.location.host + "/ws/read_qr_progress/");
+    const socket = new WebSocket("ws://" + window.location.host + "/ws/progress/");
 
-    let channelName = null;  // Stocker le vrai nom du canal WebSocket
-    const progressMessage = document.getElementById("progress-message");
-    const qrCodeProgressMessage = document.getElementById("qr-code-progress-message");
+    socket.onopen = function() {
+        //console.log("✅ WebSocket connecté !");
+    };
 
-    socket.onopen = function () {
-        console.log("✅ WebSocket connecté !");
+    socket.onclose = function() {
+        //console.log("❌ WebSocket déconnecté !");
+    };
+
+    socket.onerror = function(error) {
+        //console.error("❌ Erreur WebSocket :", error);
     };
 
     socket.onmessage = function(event) {
         const data = JSON.parse(event.data);
 
-        // Récupérer le vrai channel_name dès la connexion WebSocket
-        if (data.channel_name) {
-            console.log("✅ Channel Name WebSocket reçu :", data.channel_name);
-            channelName = data.channel_name;  // Stocker pour l'envoyer dans la requête AJAX
-            return;
-        }
-
         // Mise à jour de la barre de progression
         document.getElementById("progress-bar").style.width = data.progress + "%";
         document.getElementById("progress-bar").textContent = data.progress + "%";
-        progressMessage.textContent = data.message;
+        document.getElementById("progress-message").textContent = data.message;
 
         if (data.progress === 100) {
-            progressMessage.textContent = "🎉 Lecture terminée avec succès ! ";
+            //console.log("Progression à 100 %, rechargement de la page...");  // Ajoutez ce log pour déboguer
+            document.getElementById("progress-message").textContent = "🎉 Tâche terminée avec succès !";
             document.getElementById("progress-bar").classList.remove("progress-bar-animated");
-
-            // Affichage du message final
-            qrCodeProgressMessage.textContent = "✔️ Tous les QR Codes ont été traités avec succès !";
 
             setTimeout(() => {
                 location.reload();
@@ -196,22 +261,22 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     };
 
+    document.getElementById("crop-button").addEventListener("click", function() {
+        this.disabled = true;
+        this.innerHTML = '<i class="bi bi-hourglass-split"></i> <span class="ms-2 d-none d-md-block" style="font-size: 0.6em;">Traitement...</span>';
+
+        fetch("{{ url('ad_agt:crop_all_photos') }}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/json"
+            }
+        });
+    });
+
     document.getElementById("read-all-qr-codes-button").addEventListener("click", function() {
         this.disabled = true;
         this.innerHTML = '<i class="bi bi-hourglass-split"></i> <span class="ms-2 me-4 d-none d-md-block" style="font-size: 0.6em;">Traitement...</span>';
-
-        // Réinitialiser le message avant de commencer le traitement
-        qrCodeProgressMessage.textContent = "";
-
-        // Vérifier si le WebSocket a bien reçu le channel_name
-        if (!channelName) {
-            qrCodeProgressMessage.textContent = "⏳ WebSocket non encore prêt ! Réessayez.";
-            this.disabled = false;
-            this.innerHTML = '<i class="bi bi-qr-code-scan"></i> <span class="ms-2 me-4 d-none d-md-block" style="font-size: 0.6em;">Lire</span>';
-            return;
-        }
-
-        console.log("🚀 Envoi de la requête avec channel_name :", channelName);
 
         fetch("{{ url('ad_agt:read_all_qr_codes') }}", {
             method: "POST",
@@ -219,20 +284,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 "X-CSRFToken": csrfToken,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ channel_name: channelName })  // Envoyer le vrai nom du canal
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Afficher un message de fin de traitement dans la page
-            qrCodeProgressMessage.textContent = data.message;
-        })
-        .catch(error => {
-            console.error("Erreur :", error);
-            qrCodeProgressMessage.textContent = "❌ Une erreur est survenue lors du traitement !";
-        })
-        .finally(() => {
-            this.disabled = false;
-            this.innerHTML = '<i class="bi bi-qr-code-scan"></i> <span class="ms-2 me-4 d-none d-md-block" style="font-size: 0.6em;">Lire</span>';
+            body: JSON.stringify({ channel_name: "progress_updates" })
         });
     });
 });

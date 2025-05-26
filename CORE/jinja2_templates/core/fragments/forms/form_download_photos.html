@@ -18,9 +18,7 @@ Ce fragment contient le formulaire qui permet de récupérer les photos traitée
 <!-- Insertion du formulaire : -->
 {% block wrapper_content %}
     <!-- Instructions pour l'utilisateur : -->
-    <form method="POST" enctype="multipart/form-data" action="{{ url('ad_agt:download_processed_photos') }}">
-        <!-- Récupération du token csrf : -->
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    <form id="download-form">
 
         <!-- Choix du format du nom de fichier : -->
         <div class="container mt-3 mb-4">
@@ -32,7 +30,7 @@ Ce fragment contient le formulaire qui permet de récupérer les photos traitée
 
                 <!-- Choix de l'ordre Nom & Prénom : -->
                 <div class="col-4">
-                    <select class="form-control" id="order-name-surname" name="order">
+                    <select class="form-control" id="order" name="order">
                         <option value="" disabled selected>Choisir l'ordre</option>
                         <option value="last_first">Nom Prénom</option>
                         <option value="first_last"> Prénom Nom</option>
@@ -56,10 +54,118 @@ Ce fragment contient le formulaire qui permet de récupérer les photos traitée
             </div>
 
             <div class="row col-3 m-auto">
-                <button type="submit" class="btn btn-info">Télécharger</button>
+                 <button type="button" id="download-button" class="btn btn-info">Télécharger</button>
             </div>
 
         </div>
     </form>
 
+    <!-- Barre de progression : -->
+    <div class="container mt-3">
+        <div class="progress">
+            <div id="progress-bar" class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                 role="progressbar" style="width: 0%;">0%</div>
+        </div>
+        <p id="progress-message" class="text-center mt-2"></p>
+    </div>
+
+    <!-- Ajout du token CSRF : -->
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+    <script>
+        // Récupérer le token CSRF :
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    </script>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const socket = new WebSocket("ws://" + window.location.host + "/ws/progress/");
+
+            socket.onopen = function() {
+                //console.log("✅ WebSocket connecté !");
+            };
+
+            socket.onclose = function() {
+                //console.log("❌ WebSocket déconnecté !");
+            };
+
+            socket.onerror = function(error) {
+                //console.error("❌ Erreur WebSocket :", error);
+            };
+
+            const downloadButton = document.getElementById("download-button");
+            const progressBar = document.getElementById("progress-bar");
+            const progressMessage = document.getElementById("progress-message");
+
+            socket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+
+                if (data.task === "download") {
+                    progressBar.style.width = data.progress + "%";
+                    progressBar.textContent = data.progress + "%";
+                    progressMessage.textContent = data.message;
+
+                    if (data.progress === 100) {
+                        progressMessage.textContent = "🎉 Téléchargement terminé !";
+                        setTimeout(() => {
+                            window.location.href = "/ad-agt/download-processed-photos/";
+                        }, 700);
+                    }
+                }
+            };
+
+            downloadButton.addEventListener("click", function() {
+                console.log("Downloading ...");
+                this.disabled = true;
+                this.innerHTML = '<i class="bi bi-hourglass-split"></i> Traitement...';
+
+                const order = document.getElementById("order").value;
+                const separator = document.getElementById("separator").value;
+                const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+                const formData = new URLSearchParams();
+                formData.append("order", order);
+                formData.append("separator", separator);
+
+                fetch("{{ url('ad_agt:download_processed_photos') }}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: formData.toString()
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("❌ Erreur HTTP " + response.status);
+                    }
+                    return response.blob();  // ✅ Lire la réponse comme un fichier Blob
+                })
+                .then(blob => {
+                    console.log("✅ Téléchargement du fichier ZIP...");
+
+                    // 🔹 Créer un lien de téléchargement temporaire
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "photos_recadrees.zip";  // Nom du fichier ZIP
+                    document.body.appendChild(a);
+                    a.click();
+
+                    // 🔹 Nettoyage du lien temporaire
+                    setTimeout(() => {
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        window.location.href = "/ad-agt/download-success/";  // Redirection après le téléchargement
+                    }, 700);
+                })
+                .catch(error => console.error("❌ Erreur Fetch :", error));
+            });
+
+        });
+    </script>
+
 {% endblock %}
+
+

@@ -72,11 +72,11 @@ Ce fragment contient le modal permettant d'afficher la photo et de mieux défini
 </div>
 
 <!-- Ajout du token CSRF : -->
-<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-<script>
-    // Récupérer le token CSRF :
-    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
-</script>
+{#<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
+{#<script>#}
+{#    // Récupérer le token CSRF :#}
+{#    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;#}
+{#</script>#}
 
 
 <!-- Script JS de Cropper.js -->

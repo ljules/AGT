@@ -37,7 +37,7 @@ Ce fragment contient le modal permettant d'afficher la photo et de choisir un é
                     <div class="col-8">
                         <select class="form-select" aria-label="Sélection d'un élève">
                             {% for student in students_without_photo %}
-                                <option>
+                                <option value="{{ student.id }}">
                                     {{ student.last_name }} {{ student.first_name }}
                                 </option>
                             {% endfor %}
@@ -62,11 +62,11 @@ Ce fragment contient le modal permettant d'afficher la photo et de choisir un é
 
 
 <!-- Ajout du token CSRF : -->
-<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-<script>
-    // Récupérer le token CSRF :
-    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
-</script>
+{#<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
+{#<script>#}
+{#    // Récupérer le token CSRF :#}
+{#    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;#}
+{#</script>#}
 
 
 <script>
@@ -81,10 +81,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Récupérer l'élève sélectionné dans la liste déroulante
         const selectElement = document.querySelector(`#modal-select-{{ photo.id }} select`);
-        const selectedStudentName = selectElement.value; // Récupère le nom complet de l'élève
+        const studentId = selectElement.value;  // On récupère directement l'ID
+        const studentName = selectElement.options[selectElement.selectedIndex].text;  // On récupère le nom affiché
 
-        // Extraire le nom et le prénom de l'élève
-        const [lastName, firstName] = selectedStudentName.split(" ");
 
         // Envoyer une requête AJAX pour mettre à jour la base de données
         fetch(`update-student-association/`, {
@@ -95,8 +94,8 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: JSON.stringify({
                 photo_id: photoId,
-                last_name: lastName,
-                first_name: firstName,
+                student_id: studentId,
+                student_name: studentName
             }),
         })
         .then(response => response.json())

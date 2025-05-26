@@ -4,7 +4,7 @@ from CORE.models import Photo
 
 
 def crop_on_face(obj_photo: Photo, scale_factor: float = 1.1, min_neighbors: int = 15, min_size: tuple = (100, 100),
-                 ratio_format: tuple[int, int] = (45, 35), margin: float = 0.80) -> None:
+                 ratio_format: tuple[int, int] = (45, 35), margin: float = 0.80) -> bool:
     """
     Prend un objet Photo pour appliquer un algorithme de détection de visage
     et met à jour les valeurs des attributs crop_x, crop_y, crop_width et crop_height de l'objet photo.
@@ -17,8 +17,7 @@ def crop_on_face(obj_photo: Photo, scale_factor: float = 1.1, min_neighbors: int
         ratio_format (tuple[int, int]): Format de l'image avec le rapport hauteur / largeur (ex: 4/3 → (4, 3)).
         margin (float): Pourcentage de pixels à ajouter autour du visage détecté.
 
-    Returns:
-        None
+    Returns (bool): Retourne True si un visage a été détecté et False sinon.
     """
 
     # Chargement de l'image depuis chemin de l'objet photo :
@@ -27,7 +26,7 @@ def crop_on_face(obj_photo: Photo, scale_factor: float = 1.1, min_neighbors: int
 
     if image is None:
         print(f"Erreur : Impossible de charger l'image {image_path}")
-        return
+        return False
 
     # Conversion en niveaux de gris (améliore la détection de visages)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -40,7 +39,7 @@ def crop_on_face(obj_photo: Photo, scale_factor: float = 1.1, min_neighbors: int
 
     if len(faces) == 0:
         print(f"Aucun visage détecté dans {image_path}")
-        return
+        return False
 
     # Sélection du premier visage détecté
     x, y, w, h = faces[0]
@@ -79,3 +78,5 @@ def crop_on_face(obj_photo: Photo, scale_factor: float = 1.1, min_neighbors: int
     obj_photo.save(update_fields=['crop_x', 'crop_y', 'crop_width', 'crop_height'])
 
     print(f"Rognage appliqué : x={x1}, y={y1}, width={obj_photo.crop_width}, height={obj_photo.crop_height}")
+
+    return True

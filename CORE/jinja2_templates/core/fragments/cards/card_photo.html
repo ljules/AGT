@@ -33,7 +33,7 @@ Ce fragment contient le card permettant de présenter les photos des utilisateur
 <!-- Code HTML de la card : -->
 <!-- ---------------------- -->
 
-<div class="card mb-3 m-1 border-2 border-dark shadow" style="height: 480px; min-width: 220px;">
+<div class="card mb-3 m-1 border-2 border-dark shadow" style="height: 420px; min-width: 220px;">
 
     <!-- Photo affichée avec rognage, centrée et sans déformation -->
     <div class="canvas-container">
@@ -58,9 +58,9 @@ Ce fragment contient le card permettant de présenter les photos des utilisateur
     <!-- Corps de la card : -->
     <div class="card-body border-top border-dark {% if photo.fk_id_student != None  %}bg-light{% else %}bg-danger-subtle{% endif %} pt-3 ps-2 pe-1">
         <div class="card-title">
-            <h5 style="font-size: 1.0em;"><span class="fw-bold text-secondary" style="font-size: 0.9em; color: darkorange;">Nom :</span>
+            <h5 style="font-size: 0.8em;"><span class="fw-bold text-secondary" style="font-size: 1.0em; color: darkorange;">Nom :</span>
                 {% if photo.fk_id_student != None  %}{{ photo.fk_id_student.last_name }}{% else %}...{% endif %}</h5>
-            <h5 style="font-size: 1.0em;"><span class="fw-bold text-secondary" style="font-size: 0.9em; color: darkorange;">Prénom :</span>
+            <h5 style="font-size: 0.8em;"><span class="fw-bold text-secondary" style="font-size: 1.0em; color: darkorange;">Prénom :</span>
                 {% if photo.fk_id_student != None %}{{ photo.fk_id_student.first_name }}{% else %}...{% endif %}</h5>
         </div>
         <ul style="font-size: 0.8em">
@@ -75,36 +75,48 @@ Ce fragment contient le card permettant de présenter les photos des utilisateur
     <!-- Pied de la card : -->
     <div class="card-footer border-top border-dark text-center" style="background-color:rgb(60,60,60)">
 
-        <!-- Bouton de suppression du lien photo/étudiant : -->
+        <!-- Bouton de verrouillage du cadrage : -->
         <button type="button"
-                class="btn btn-warning p-2 remove-student-btn"
-                title="Supprimer le lien avec l'élève"
-                data-photo-id="{{ photo.id }}">
-                    <i class="bi bi-person-fill-x"></i>
+                class="btn btn-secondary p-1"
+                style="border-color: #202020;"
+                title="Verrouiller/déverrouiller le cadrage"
+                onclick="window.location.href='{{ url('ad_agt:home_handler') }}?flip-lock=flip&photo-id={{ photo.id }}'">
+                    <i class="bi {% if photo.crop_lock == True %}bi-lock-fill{% else %}bi-unlock-fill{% endif %}"></i>
         </button>
-
-        <!-- Bouton d'ouverture du modal pour associer un élève : -->
-        <button type="button"
-                class="btn btn-secondary p-2"
-                title="Voir l'image complète et affecter un élève"
-                data-bs-toggle="modal"
-                data-bs-target="#modal-select-{{ photo.id }}">
-                    <i class="bi bi-person-lines-fill"></i>
-        </button>
-
 
         <!-- Bouton d'ouverture du modal pour rogner l'image : -->
         <button type="button"
-                class="btn btn-secondary p-2"
+                class="btn btn-info p-1"
+                style="border-color: #202020;"
                 title="Ouvrir l'image pour modifier le rognage"
                 data-bs-toggle="modal"
                 data-bs-target="#modal-crop-{{ photo.id }}">
                     <i class="bi bi-person-bounding-box"></i>
         </button>
 
+        <!-- Bouton d'ouverture du modal pour associer un élève : -->
+        <button type="button"
+                class="btn btn-info p-1"
+                style="border-color: #202020;"
+                title="Voir l'image complète et affecter un élève"
+                data-bs-toggle="modal"
+                data-bs-target="#modal-select-{{ photo.id }}">
+                    <i class="bi bi-person-lines-fill"></i>
+        </button>
+
+        <!-- Bouton de suppression du lien photo/étudiant : -->
+        <button type="button"
+                class="btn btn-warning p-1 remove-student-btn"
+                style="border-color: #202020;"
+                title="Supprimer le lien avec l'élève"
+                data-photo-id="{{ photo.id }}">
+                    <i class="bi bi-person-fill-x"></i>
+        </button>
+
         <!-- Bouton de suppression de l'objet & fichier photo : -->
         <button type="button"
-                class="btn btn-danger p-2 delete-photo-btn"
+                class="btn btn-danger p-1 delete-photo-btn"
+                style="border-color: #202020;"
                 title="Supprimer le fichier de l'image"
                 data-photo-id="{{ photo.id }}">
                     <i class="bi bi-trash3-fill"></i>
@@ -119,11 +131,11 @@ Ce fragment contient le card permettant de présenter les photos des utilisateur
 <!-- --------- -->
 
 <!-- Ajout du token CSRF : -->
-<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-<script>
-    // Récupérer le token CSRF :
-    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
-</script>
+{#<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
+{#<script>#}
+{#    // Récupérer le token CSRF :#}
+{#    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;#}
+{#</script>#}
 
 
 <script>
