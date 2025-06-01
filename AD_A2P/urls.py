@@ -10,4 +10,5 @@ urlpatterns = [
     path('students-editor/', views.editor, name='students_editor'),
     path('qr-code-tab', views.qr_code_tab, name='qr_code_tab'),
     path('qr-code-ins', views.qr_code_ins, name='qr_code_ins'),
+    path('api/latest-student-id', views.latest_student_id, name='latest_student_id'),
 ]

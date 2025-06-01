@@ -19,9 +19,11 @@ from CORE.models import Photo, Student
 from CORE.utils.crop_on_face import crop_on_face
 from CORE.utils.read_qr_code import read_qr_code
 from CORE.utils.correct_orientation import correct_orientation
+from CORE.views import simple_auth_required
 
 
 # HOME HANDLER :
+@simple_auth_required
 def home_handler(request):
 
     # Récupérer & appliquer le statut du verrouillage :
@@ -85,6 +87,7 @@ def home_handler(request):
 
 # UPLOAD DES PHOTOS AVEC FILEPOND :
 # @csrf_exempt
+@simple_auth_required
 def upload_photos(request):
     if request.method == 'POST':
         files = request.FILES.getlist('images')  # Récupérer tous les fichiers
@@ -112,6 +115,7 @@ def upload_photos(request):
 
 # ENREGISTREMENT DU ROGNAGE DES IMAGES :
 # @csrf_exempt
+@simple_auth_required
 def save_crop_coordinates(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -139,6 +143,7 @@ def save_crop_coordinates(request):
 
 
 # ROGNER TOUTES LES PHOTOS AVEC LA FONCTION UTILITAIRE CROP_ON_FACE() :
+@simple_auth_required
 def crop_all_photos(request):
     """
     Vue pour recadrer toutes les photos et envoyer la progression en temps réel via WebSockets.
@@ -172,6 +177,7 @@ def crop_all_photos(request):
 
 # ASSOCIER TOUTES LES PHOTOS A UNE ELEVE AVEC LA FONCTION UTILITAIRE READ_QR_CODE() :
 # @csrf_exempt
+@simple_auth_required
 def read_all_qr_codes(request):
     """
     Vue pour lire les QR Codes des photos et envoyer la progression via WebSocket.
@@ -229,6 +235,7 @@ def read_all_qr_codes(request):
 
 # AJOUT D'UNE ASSOCIATION ELEVE-PHOTO :
 #@csrf_exempt
+@simple_auth_required
 def update_student_association(request):
     if request.method == 'POST':
         try:
@@ -257,6 +264,7 @@ def update_student_association(request):
 
 # SUPPRESSION D'UNE PHOTO (objet + fichier) :
 # @csrf_exempt
+@simple_auth_required
 def delete_photo(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -282,6 +290,7 @@ def delete_photo(request):
 
 # SUPPRESSION DU LIEN ENTRE LA PHOTO & UN ETUDIANT/ELEVE :
 # @csrf_exempt
+@simple_auth_required
 def remove_student_association(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -301,6 +310,7 @@ def remove_student_association(request):
 
 # SUPPRESSION DE TOUS LES LIENS ENTRE LES PHOTOS & LEURS ELEVES :
 # @csrf_exempt
+@simple_auth_required
 def remove_all_students_from_photos(request):
     if request.method == "POST":
         try:
@@ -314,6 +324,7 @@ def remove_all_students_from_photos(request):
 
 # SUPPRESSION DE TOUTES LES PHOTOS (objets + fichiers)
 # @csrf_exempt
+@simple_auth_required
 def delete_all_photos(request):
     if request.method == 'POST':
         try:
@@ -336,10 +347,12 @@ def delete_all_photos(request):
 
 
 # DOWNLOAD DES PHOTOS :
+@simple_auth_required
 def download_photos(request):
     return render(request, 'ad_agt/download_photos.html')
 
 
+@simple_auth_required
 def download_processed_photos(request):
     """
     Vue qui génère une archive ZIP des photos recadrées et informe WebSocket de la progression.
@@ -428,6 +441,7 @@ def download_processed_photos(request):
 
     return JsonResponse({"error": "Méthode non autorisée."}, status=405)
 
+@simple_auth_required
 def download_success(request):
     """
     Vue pour afficher un message de succès après le téléchargement.

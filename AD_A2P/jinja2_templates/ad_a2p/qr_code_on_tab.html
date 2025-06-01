@@ -38,10 +38,28 @@ Cette page du template définira la page d'affichage des QR Codes sur tablette.
     {% endblock %}
 
     {% block zone_qr_code %}
-    <div class="container-fluid vh-100" style="background-color:#64ff64;">
-        {% include 'ad_a2p/fragments/form_qr_code.html' %}
-    </div>
-
+        <div class="container-fluid vh-100" style="background-color:#64ff64;">
+            {% include 'ad_a2p/fragments/form_qr_code.html' %}
+        </div>
     {% endblock %}
+
+    <script>
+    // Auto-refresh du QR Code si un nouvel élève est détecté
+    document.addEventListener("DOMContentLoaded", function () {
+        let currentId = {{ selected_student.id if selected_student else 'null' }};
+
+        setInterval(() => {
+            fetch("{{ latest_student_url }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.latest_id && data.latest_id !== currentId) {
+                        // Recharge la page avec le nouvel ID
+                        window.location.href = "?student_id=" + data.latest_id;
+                    }
+                })
+                .catch(error => console.error("Erreur AJAX (vérification nouvel élève) :", error));
+        }, 3000); // Vérifie toutes les 3 secondes
+    });
+    </script>
 
 {% endblock %}

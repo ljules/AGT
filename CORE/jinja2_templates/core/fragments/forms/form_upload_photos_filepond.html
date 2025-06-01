@@ -59,6 +59,16 @@ Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de
         </div>
         {% endif %}
 
+        <!-- Barre de progression générale -->
+        <div class="progress mt-4" style="height: 25px;">
+            <div id="globalProgressBar"
+                 class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                 role="progressbar"
+                 style="width: 0%">
+                0 / 0 fichiers
+            </div>
+        </div>
+
         <!-- Formulaire d'upload :-->
         <form method="POST" enctype="multipart/form-data" class="g-5 mt-3">
             <!-- Récupération du token csrf : -->
@@ -68,6 +78,7 @@ Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de
             <input type="file" name="images" id="images" multiple>
 
         </form>
+
     </div>
 
 
@@ -113,6 +124,30 @@ Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de
                 return file.name;  // Conserve le nom du fichier tel quel
             },
         });
+
+
+        // Mise à jour de la barre de progression générale :
+        let totalFiles = 0;
+        let processedFiles = 0;
+
+        pond.on('addfilestart', () => {
+            totalFiles = pond.getFiles().length;
+            processedFiles = 0;
+            updateGlobalProgressBar();
+        });
+
+        pond.on('processfile', () => {
+            processedFiles++;
+            updateGlobalProgressBar();
+        });
+
+        function updateGlobalProgressBar() {
+            const percent = totalFiles > 0 ? Math.round((processedFiles / totalFiles) * 100) : 0;
+            const progressBar = document.getElementById('globalProgressBar');
+            progressBar.style.width = `${percent}%`;
+            progressBar.textContent = `${processedFiles} / ${totalFiles} fichiers`;
+        }
+
     </script>
 
 {% endblock %}

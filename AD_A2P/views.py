@@ -1,17 +1,20 @@
-from idlelib.rpc import response_queue
-
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.urls import reverse
 
 from CORE.forms import StudentForm
 from CORE.models import Student
 from CORE.utils.import_students_from_csv import import_students_from_csv
+from CORE.views import simple_auth_required
 
 from django.contrib.messages import get_messages
 
+
 # SAISIE MANUELLE D'UN ELEVE :
+@simple_auth_required
 def sign_up(request):
     # Méthode POST : Traitement du formulaire de saisi d'un nouvel élève/étudiant
     if request.method == "POST":
@@ -34,6 +37,7 @@ def sign_up(request):
 
 
 # AFFICHAGE DU RESULTAT DE L'IMPORTATION :
+@simple_auth_required
 def import_result(request):
     """
     Vue pour afficher les résultats de l'importation.
@@ -42,12 +46,47 @@ def import_result(request):
     return render(request, 'ad_a2p/import_result.html', {'messages': storage})
 
 
+# IMPORT DES ELEVES A PARTIR D'UN CSV :
+@simple_auth_required
+def import_students(request):
+    """
+    Vue pour importer une liste d'élèves à partir d'un fichier CSV.
+    :param request:
+    :return:
+    """
+
+    if request.method == "POST" and request.FILES.get('csv_file'):
+        # Récupération du fichier csv :
+        csv_file = request.FILES.get('csv_file')
+
+        # Vérifier si le fichier a l'extension correcte :
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, "Le fichier doit être au format CSV.")
+            return redirect('ad_a2p:import_result')
+
+        # Appelle la fonction utilitaire d'importation :
+        try:
+            imported_count, errors = import_students_from_csv(csv_file)
+            messages.success(request, f"{imported_count} élève(s) importé(s) avec succès.")
+            for error in errors:
+                messages.warning(request, error)
+        except ValidationError as e:
+            messages.error(request, f"Erreur : {e}")
+        except Exception as e:
+            messages.error(request, f"Une erreur inattendue s'est produite : {e}")
+
+        return redirect('ad_a2p:import_result')
+
+    return render(request, 'ad_a2p/students_sign_up.html')
+
+
 # EDITION DE LA LISTE DES ELEVES DE LA BD :
+@simple_auth_required
 def editor(request):
 
     # Récupère le paramètre de tri :
     sort_by = request.GET.get('sort', 'id')  # Tri par défaut : ID
-    order = request.GET.get('order', 'asc')  # Ordre par défaut : croissant
+    order = request.GET.get('order', 'desc')  # Ordre par défaut : décroissant
 
     # Détermine l'ordre de tri :
     if order == 'desc':
@@ -89,39 +128,6 @@ def editor(request):
     })
 
 
-# IMPORT DES ELEVES A PARTIR D'UN CSV :
-def import_students(request):
-    """
-    Vue pour importer une liste d'élèves à partir d'un fichier CSV.
-    :param request:
-    :return:
-    """
-
-    if request.method == "POST" and request.FILES.get('csv_file'):
-        # Récupération du fichier csv :
-        csv_file = request.FILES.get('csv_file')
-
-        # Vérifier si le fichier a l'extension correcte :
-        if not csv_file.name.endswith('.csv'):
-            messages.error(request, "Le fichier doit être au format CSV.")
-            return redirect('ad_a2p:import_result')
-
-        # Appelle la fonction utilitaire d'importation :
-        try:
-            imported_count, errors = import_students_from_csv(csv_file)
-            messages.success(request, f"{imported_count} élève(s) importé(s) avec succès.")
-            for error in errors:
-                messages.warning(request, error)
-        except ValidationError as e:
-            messages.error(request, f"Erreur : {e}")
-        except Exception as e:
-            messages.error(request, f"Une erreur inattendue s'est produite : {e}")
-
-        return redirect('ad_a2p:import_result')
-
-    return render(request, 'ad_a2p/students_sign_up.html')
-
-
 # AFFICHAGE QR CODE SUR TABLETTE :
 def qr_code_tab(request):
     """
@@ -137,9 +143,13 @@ def qr_code_tab(request):
     selected_student_id = request.GET.get('student_id', students.first().id if students.exists() else None)
     selected_student = get_object_or_404(Student, id=selected_student_id) if selected_student_id else None
 
+    # Ajout de l'URL AJAX au contexte
+    latest_student_url = reverse('ad_a2p:latest_student_id')
+
     return render(request, 'ad_a2p/qr_code_on_tab.html', {
         'students': students,
         'selected_student': selected_student,
+        'latest_student_url': latest_student_url,
     })
 
 # AFFICHAGE QR CODE SUR ENI :
@@ -157,7 +167,18 @@ def qr_code_ins(request):
     selected_student_id = request.GET.get('student_id', students.first().id if students.exists() else None)
     selected_student = get_object_or_404(Student, id=selected_student_id) if selected_student_id else None
 
+    # Ajout de l'URL AJAX au contexte
+    latest_student_url = reverse('ad_a2p:latest_student_id')
+
     return render(request, 'ad_a2p/qr_code_on_ins.html', {
         'students': students,
         'selected_student': selected_student,
+        'latest_student_url': latest_student_url,
     })
+
+
+# API AJAX : Retourne l'ID du dernier élève inscrit
+@simple_auth_required
+def latest_student_id(request):
+    latest = Student.objects.order_by('-id').first()
+    return JsonResponse({'latest_id': latest.id if latest else None})

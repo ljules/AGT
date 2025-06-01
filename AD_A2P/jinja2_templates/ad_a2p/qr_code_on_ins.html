@@ -213,4 +213,24 @@ Cette page du template définira la page d'affichage des QR Codes sur un ENI.
             loadPanelColor();
         });
     </script>
+
+    <script>
+    // Auto-refresh du QR Code si un nouvel élève est détecté
+    document.addEventListener("DOMContentLoaded", function () {
+        let currentId = {{ selected_student.id if selected_student else 'null' }};
+
+        setInterval(() => {
+            fetch("{{ latest_student_url }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.latest_id && data.latest_id !== currentId) {
+                        // Recharge la page avec le nouvel ID
+                        window.location.href = "?student_id=" + data.latest_id;
+                    }
+                })
+                .catch(error => console.error("Erreur AJAX (vérification nouvel élève) :", error));
+        }, 3000); // Vérifie toutes les 3 secondes
+    });
+</script>
+
 {% endblock %}

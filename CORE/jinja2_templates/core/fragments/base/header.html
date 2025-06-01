@@ -29,16 +29,16 @@ Ce fragment contient l'entête de l'application.
         <div class="d-flex bg-dark col-4 ms-auto pt-1 pb-1 align-items-center">
             <!-- Identité de l'utilisateur : -->
             <div class="ms-4 text-light">
-                 John DOE
+                 Vie Scolaire
             </div>
 
             <!-- Bouton déconnexion : -->
-            <button type="button"
-                    class="btn d-flex justify-content-center align-items-center btn-warning col-1 mt-0 mb-0 ms-auto me-4 rounded-2"
-                    style="width: 30px; height: 30px; font-size: 1.1em;"
-                    title="Se déconnecter">
-                    <i class="bi bi-key"></i>
-            </button>
+            <a  href="{{ url('core:logout') }}"
+                class="btn d-flex justify-content-center align-items-center btn-warning col-1 mt-0 mb-0 ms-auto me-4 rounded-2"
+                style="width: 30px; height: 30px; font-size: 1.1em;"
+                title="Se déconnecter">
+                <i class="bi bi-key"></i>
+            </a>
         </div>
 
     </div>

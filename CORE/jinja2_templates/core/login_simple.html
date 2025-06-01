@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+
+
+
+{% block content %}
+    <!-- Wrapper pour centrer le contenu -->
+    <div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="bg-white shadow p-4 m-5 rounded-4 w-75 border border-2 border-warning">
+        <h2>Connexion requise</h2>
+        <form method="post">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <div class="ms-4 mb-3">
+                <label for="password" class="form-label">Mot de passe</label>
+                <input type="password"
+                       class="form-control"
+                       id="password"
+                       name="password"required
+                        title="Saisir le mot de passe de connexion">
+            </div>
+            <button type="submit"
+                    class="btn btn-primary ms-4">
+                    Se connecter
+            </button>
+        </form>
+
+        <div class="d-flex justify-content-center align-items-center">
+            N'oubliez pas de vous déconnecter en fin de session avec le bouton :
+            <i class="ms-2 px-1 bg-warning rounded-2 shadow bi bi-key"></i>
+        </div>
+
+
+        {% for message in messages %}
+            <div class="alert alert-danger mt-3">{{ message }}</div>
+        {% endfor %}
+    </div>
+    </div>
+
+{% endblock %}
+
