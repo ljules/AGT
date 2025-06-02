@@ -43,10 +43,21 @@ Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de
 <!-- Insertion du formulaire : -->
 {% block wrapper_content %}
     <!-- Instructions pour l'utilisateur : -->
-    <div class="container mt-3 mb-4">
+    <div id="upload-wrapper" class="container mt-3 mb-4">
         <div class="row col h4 ms-2">Veuillez cibler le dossier contenant vos photos et
             les uploader sur le serveur.
         </div>
+
+        <!-- Barre de progression générale -->
+        <div class="progress mt-4" style="height: 25px;">
+            <div id="globalProgressBar"
+                 class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                 role="progressbar"
+                 style="width: 0%">
+                0 / 0 fichiers
+            </div>
+        </div>
+
 
         <!-- Message info après upload : -->
         {% if messages %}
@@ -58,16 +69,6 @@ Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de
             {% endfor %}
         </div>
         {% endif %}
-
-        <!-- Barre de progression générale -->
-        <div class="progress mt-4" style="height: 25px;">
-            <div id="globalProgressBar"
-                 class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                 role="progressbar"
-                 style="width: 0%">
-                0 / 0 fichiers
-            </div>
-        </div>
 
         <!-- Formulaire d'upload :-->
         <form method="POST" enctype="multipart/form-data" class="g-5 mt-3">
@@ -111,7 +112,7 @@ Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de
         // Envoyer les fichiers au serveur :
         FilePond.setOptions({
             server: {
-                url: '',
+                url: '/ad-agt/upload/',
                 process: {
                     method: 'POST',
                     revert: null, // Désactive la suppression de fichier, sinon renseigner l'url ex : "/delete-photo/"
@@ -120,6 +121,7 @@ Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de
                     },
                 },
             },
+            name: 'file',
             fileRenameFunction: (file) => {
                 return file.name;  // Conserve le nom du fichier tel quel
             },
@@ -131,6 +133,7 @@ Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de
         let processedFiles = 0;
 
         pond.on('addfilestart', () => {
+            document.querySelector('.progress').style.display = 'block';
             totalFiles = pond.getFiles().length;
             processedFiles = 0;
             updateGlobalProgressBar();
@@ -141,12 +144,43 @@ Ce fragment contient le formulaire qui permet d'envoyer les photos au serveur de
             updateGlobalProgressBar();
         });
 
+        pond.on('processfiles', () => {
+            resetAfterUpload();
+        });
+
+
         function updateGlobalProgressBar() {
             const percent = totalFiles > 0 ? Math.round((processedFiles / totalFiles) * 100) : 0;
             const progressBar = document.getElementById('globalProgressBar');
             progressBar.style.width = `${percent}%`;
             progressBar.textContent = `${processedFiles} / ${totalFiles} fichiers`;
+
+            // Cacher si terminé
+            if (processedFiles === totalFiles && totalFiles > 0) {
+                setTimeout(() => {
+                    progressBar.parentElement.style.display = 'none';
+                }, 1000);
+            }
         }
+
+
+        function resetAfterUpload() {
+            // Vider les fichiers FilePond
+            pond.removeFiles();
+
+            // Réinitialiser les compteurs
+            totalFiles = 0;
+            processedFiles = 0;
+            updateGlobalProgressBar();
+
+            // Afficher un message
+            const container = document.getElementById('upload-wrapper');
+            const alertBox = document.createElement('div');
+            alertBox.className = 'alert alert-success mt-4';
+            alertBox.textContent = '✅ Upload terminé : toutes les images ont été envoyées avec succès.';
+            container.appendChild(alertBox);
+        }
+
 
     </script>
 

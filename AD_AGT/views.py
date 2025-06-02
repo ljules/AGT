@@ -112,6 +112,23 @@ def upload_photos(request):
         messages.success(request, 'Les photos ont été uploadées avec succès.')
     return render(request, 'ad_agt/upload_photos.html')
 
+# RECEPTION DES FICHIERS PHOTO AVEC FILEPOND EN MODE ASYNCHRONE AJAX :
+#@csrf_exempt
+def upload_photos_ajax(request):
+    #print("Méthode :", request.method)
+    #print("Fichiers reçus :", request.FILES)
+    if request.method == 'POST' and request.FILES.get('file'):
+        uploaded_file = request.FILES['file']
+        save_path = os.path.join(settings.MEDIA_ROOT, 'photos', uploaded_file.name)
+
+        with open(save_path, 'wb+') as f:
+            for chunk in uploaded_file.chunks():
+                f.write(chunk)
+
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+
 
 # ENREGISTREMENT DU ROGNAGE DES IMAGES :
 # @csrf_exempt
