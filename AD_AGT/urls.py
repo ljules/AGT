@@ -6,7 +6,6 @@ app_name = 'ad_agt'  # Namespace pour les URLs de cette application
 urlpatterns = [
     path('home-handler/', views.home_handler, name='home_handler'),
     path('upload-photos/', views.upload_photos, name='upload_photos'),
-    path('upload/', views.upload_photos_ajax, name='upload_photos_ajax'),
     path('download-photos/', views.download_photos, name='download_photos'),
     path('download-processed-photos/', views.download_processed_photos, name='download_processed_photos'),
     path('download-success/', views.download_success, name='download_success'),

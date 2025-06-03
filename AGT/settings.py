@@ -176,6 +176,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # Désactiver le commentaire en production.
+
 # Ajout de la liste de définition des fichiers statiques :
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
@@ -185,6 +187,9 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+
+# Dossier temporaire pour écrire les fichiers avant traitement
+FILE_UPLOAD_TEMP_DIR = os.path.join(BASE_DIR, 'tmp', 'django_uploads')
 
 # Ajout de SITE_URL (utile pour Jinja2) :
 if DEBUG:

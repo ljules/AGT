@@ -90,44 +90,36 @@ def home_handler(request):
 @simple_auth_required
 def upload_photos(request):
     if request.method == 'POST':
-        files = request.FILES.getlist('images')  # Récupérer tous les fichiers
-        for file in files:
-            # Extraire le nom du fichier uploadé
-            uploaded_file_name = os.path.basename(file.name)
-            #print(f"Nom du fichier avant traitement : {file.name}")  # Débogage
+        # 📂 Support FilePond : un seul fichier envoyé sous le champ "file"
+        if 'file' in request.FILES:
+            files = [request.FILES['file']]
+        else:
+            files = request.FILES.getlist('images')  # Formulaire classique
 
-            # Vérifier si une photo avec le même nom de fichier existe déjà
+        for file in files:
+            uploaded_file_name = os.path.basename(file.name)
+
+            # 🔄 Vérifie si une photo avec le même nom existe
             existing_photo = Photo.objects.filter(file_name=uploaded_file_name).first()
 
             if existing_photo:
-                # Si une photo existe, mettre à jour le fichier
-                existing_photo.image.delete(save=False)  # Supprimer l'ancien fichier
-                existing_photo.image = file  # Mettre à jour avec le nouveau fichier
-                existing_photo.save()  # Sauvegarder les modifications
+                # 🗑️ Supprimer l'ancien fichier et remplacer
+                if existing_photo.image:
+                    existing_photo.image.delete(save=False)
+                existing_photo.image = file
+                existing_photo.save()
             else:
-                # Si la photo n'existe pas, créer une nouvelle instance
-                photo = Photo.objects.create(image=file, file_name=uploaded_file_name)
-                #print(f"Nom du fichier après traitement : {photo.image.name}")  # Débogage
+                # ➕ Créer une nouvelle entrée
+                Photo.objects.create(image=file, file_name=uploaded_file_name)
 
+        # 🔁 Réponse pour appel AJAX (FilePond)
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'ok'})
+
+        # ✅ Sinon, retour classique avec message
         messages.success(request, 'Les photos ont été uploadées avec succès.')
+
     return render(request, 'ad_agt/upload_photos.html')
-
-# RECEPTION DES FICHIERS PHOTO AVEC FILEPOND EN MODE ASYNCHRONE AJAX :
-#@csrf_exempt
-def upload_photos_ajax(request):
-    #print("Méthode :", request.method)
-    #print("Fichiers reçus :", request.FILES)
-    if request.method == 'POST' and request.FILES.get('file'):
-        uploaded_file = request.FILES['file']
-        save_path = os.path.join(settings.MEDIA_ROOT, 'photos', uploaded_file.name)
-
-        with open(save_path, 'wb+') as f:
-            for chunk in uploaded_file.chunks():
-                f.write(chunk)
-
-        return JsonResponse({'status': 'ok'})
-    return JsonResponse({'status': 'error'}, status=400)
-
 
 
 # ENREGISTREMENT DU ROGNAGE DES IMAGES :
