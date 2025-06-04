@@ -1,0 +1,19 @@
+[Unit]
+Description=Gunicorn daemon for AGT Django project
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/AGT
+ExecStart=/opt/AGT/venv/bin/gunicorn \
+          --workers 3 \
+          --bind unix:/opt/AGT/gunicorn.sock \
+          AGT.wsgi:application
+
+# Optionnel : gestion des redémarrages
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

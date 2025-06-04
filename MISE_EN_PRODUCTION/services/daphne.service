@@ -1,0 +1,16 @@
+# /etc/systemd/system/daphne.service
+[Unit]
+Description=Daphne ASGI server for AGT project
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/AGT
+Environment="DJANGO_SETTINGS_MODULE=AGT.settings"
+ExecStart=/opt/AGT/venv/bin/daphne -u /run/daphne/daphne.sock --access-log - AGT.asgi:application
+Restart=always
+RuntimeDirectory=daphne
+
+[Install]
+WantedBy=multi-user.target

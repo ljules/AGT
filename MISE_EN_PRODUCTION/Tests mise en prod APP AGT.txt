@@ -1,0 +1,43 @@
+Journal des tests de mise en production de l'application AGT :
+--------------------------------------------------------------
+
+Vérification de Python et Git :
+-------------------------------
+
+Python 3.11.2 est installé.
+Git n'est pas installé et a été installé.
+Dans le home d'administrateut clonage du projet avec :
+	git clone https://github.com/ljules/AGT
+
+Installation de venv avec :
+	sudo apt install python3.11-venv
+
+Création de l'environnement virtuel :
+	python3 -m venv venv
+
+Activation de l'environnement virtuel :
+	source venv/bin/activate
+
+Installation des dépendances du projet :
+	pip install -r requirements.txt
+
+Modification du fichier de configuration settings.py en ajoutant ligne 179 :
+	STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+		
+
+Le fichier ./AGT/AD_A2P/views.py pose problème à de l'import : from idlelib.rpc import response_queue
+C'est une bibliothèque Windows, la ligne a été commentée.
+
+Exécution des commandes de préparation :
+	python manage.py collectstatic
+	python manage.py makemigrations
+	python manage.py migrate
+	
+Lancement du serveur avec (bien mettre 0.0.0.0 pour écouter sur toutes les interfaces) :
+	python manage.py runserver 0.0.0.0:8000
+	
+
+
+
+
+	

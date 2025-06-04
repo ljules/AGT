@@ -1,0 +1,233 @@
+Désinstallation d'Apache2 :
+---------------------------
+
+sudo systemctl stop apache2
+sudo systemctl disable apache2
+sudo apt purge apache2 apache2-utils apache2-bin apache2-data apache2.2-common
+sudo apt autoremove --purge
+sudo rm -rf /etc/apache2
+
+Installation de Nginx :
+-----------------------
+sudo apt update
+sudo apt install nginx
+sudo systemctl start nginx
+sudo systemctl enable nginx
+
+Clonnage du projet dans le dossier /opt: git clone https://github.com/ljules/AGT
+Placer www-data comme propriétaire : sudo chown -R www-data:www-data /opt/AGT
+Ajouter les bons ACL :	sudo chmod -R 775 /opt/AGT
+			sudo chmod g+s /opt/AGT
+Ajouter l'utilisateur de la session au groupe www-data :
+	sudo usermod -aG www-data administrateur
+
+
+ATTENTION : il faut se redémarrer la machine pour que l'appartenance au groupe soit pris en compte !
+
+Ajout de l'environnement en exécutant dans le dossier /opt/agt :
+	python3 -m venv venv
+	
+Activer l'environnement : 
+	source venv/bin/activate
+Installer les dépendances : 
+	pip install -r requirements.txt
+	
+Installation de gunicorn (toujours avec venv) :
+	pip install gunicorn
+	
+Test du fonctionnement de gunicorn :
+	gunicorn AGT.wsgi:application
+	
+Exécution de gunicorn avec un socket UNIX
+
+	gunicorn --workers 3 --bind unix:/opt/AGT/gunicorn.sock AGT.wsgi:application
+
+
+Configuration de Nginx pour exécuter l'application AGT :
+--------------------------------------------------------
+
+Création du fichier de configuration :
+
+Exécution de nano pour créer un nouveau fichier :
+
+	sudo nano /etc/nginx/sites-available/agt
+
+Coller le contenu suivant :
+__________________________________________________________________
+
+server {
+    listen 80;
+    server_name localhost;
+
+    # Fichiers statiques
+    location /static/ {
+        alias /opt/AGT/static/;
+    }
+
+    # Fichiers médias (si utilisés)
+    location /media/ {
+        alias /opt/AGT/media/;
+    }
+
+    # Application Django via Gunicorn
+    location / {
+        proxy_pass http://unix:/opt/AGT/gunicorn.sock;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+________________________________________________________________________________
+
+Création du lien symbolique :
+	sudo ln -s /etc/nginx/sites-available/agt /etc/nginx/sites-enabled/
+
+Suppression du site par défaut :
+	sudo rm /etc/nginx/sites-enabled/default
+    
+Test de la configuration de Nginx : 
+	sudo nginx -t
+    
+On doit obtenir : nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+Redémarrer Nginx :
+	sudo systemctl reload nginx
+	
+Tester le site dans le navigateur : http://locahost
+
+Si ok, on passe à la création du service.
+
+
+
+Création du service d'exécution de l'application :
+	sudo nano /etc/systemd/system/agt-gunicorn.service
+    
+ Coller le fichier :
+ 
+ _________________________________________________________
+ 
+ [Unit]
+Description=Gunicorn daemon for AGT Django project
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/AGT
+ExecStart=/opt/AGT/venv/bin/gunicorn \
+          --workers 3 \
+          --bind unix:/opt/AGT/gunicorn.sock \
+          AGT.wsgi:application
+
+# Optionnel : gestion des redémarrages
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+ 
+ 
+ __________________________________________________________
+
+
+Recharger les services :
+------------------------
+    sudo systemctl daemon-reexec
+    sudo systemctl daemon-reload
+
+
+Exécution du service agt-gunicorn :
+------------------------------------
+	sudo systemctl start agt-gunicorn
+	sudo systemctl enable agt-gunicorn
+ 
+
+On peut vérifier l'exécution sur service :
+	sudo systemctl status agt-gunicorn
+
+
+
+Attention, les il faut augmenter la taille des fichiers pouvant être envoyé au serveur :
+----------------------------------------------------------------------------------------
+sudo nano /etc/nginx/sites-available/agt
+
+Et ajouter :
+	client_max_body_size 20M;
+	
+	
+
+INSTALLATION DE Redis :
+-----------------------
+L'installation de Redis est nécessaire pour faire exécuter le serveur WebSocket Daphne et Gunicorn dans le même processus.
+
+	sudo apt install redis-server
+	sudo systemctl enable redis-server
+	sudo systemctl start redis-server
+
+
+Création du service pour Daphne: 
+--------------------------------
+
+Créer le fichier du service :
+	sudo nano /etc/systemd/system/daphne.service
+	
+Contenu du fichier :
+
+___________________________________________________
+
+# /etc/systemd/system/daphne.service
+[Unit]
+Description=Daphne ASGI server for AGT project
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/AGT
+Environment="DJANGO_SETTINGS_MODULE=AGT.settings"
+ExecStart=/opt/AGT/venv/bin/daphne -u /run/daphne/daphne.sock --access-log - AGT.asgi:application
+Restart=always
+RuntimeDirectory=daphne
+
+[Install]
+WantedBy=multi-user.target
+
+___________________________________________________
+
+
+Création du dossier pour le socket et déclarer www-data comme propriétaire  :
+	sudo mkdir -p /run/daphne
+	sudo chown www-data:www-data /run/daphne
+	
+	
+	
+Activation & démarrage du service :
+	sudo systemctl daemon-reexec
+	sudo systemctl daemon-reload
+	sudo systemctl enable daphne
+	sudo systemctl start daphne
+
+	
+Ajout du Websocket vers Daphne sur Nginx :
+dans le fichier : /etc/nginx/sites-available/agt, ajouter dans le bloc server {} :
+
+______________________________
+
+# Proxy WebSocket vers Daphne
+location /ws/ {
+    proxy_pass http://unix:/run/daphne/daphne.sock;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
+	
+_____________________________
+
+
+
+

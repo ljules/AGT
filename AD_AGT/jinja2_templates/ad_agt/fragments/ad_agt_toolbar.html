@@ -228,7 +228,10 @@ Fragment pour la barre d'outils du module de traitement des photos
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const socket = new WebSocket("ws://" + window.location.host + "/ws/progress/");
+    //const socket = new WebSocket("ws://" + window.location.host + "/ws/progress/");
+    const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const host = window.location.host;
+    const socket = new WebSocket(`${protocol}${host}/ws/progress/`);
 
     socket.onopen = function() {
         //console.log("✅ WebSocket connecté !");
@@ -271,7 +274,20 @@ document.addEventListener("DOMContentLoaded", function() {
                 "X-CSRFToken": csrfToken,
                 "Content-Type": "application/json"
             }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("✅ Réponse crop_all_photos :", data);
+        })
+        .catch(error => {
+            console.error("❌ Erreur lors du fetch crop_all_photos :", error);
         });
+
     });
 
     document.getElementById("read-all-qr-codes-button").addEventListener("click", function() {
